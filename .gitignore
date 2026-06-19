@@ -1,0 +1,30 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/*
+!.vscode/settings.json
+.idea/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Node (for the SDK packages added later)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dist/
+build/
+
+# Python (for the face engine added later)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Netlify
+.netlify/

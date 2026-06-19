@@ -1,0 +1,17 @@
+# Netlify configuration for the Sierrafy landing page.
+# The site is a single static file with no build step, so we publish the
+# repository root as-is. When the SDK monorepo is added later, move the
+# landing page into its own directory and point `publish` at that folder.
+
+[build]
+  publish = "."
+  command = ""
+
+# Security headers — sensible defaults for a static identity-project site.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
