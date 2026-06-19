@@ -24,12 +24,6 @@ Delivered as a self-hostable REST gateway (Docker) plus SDKs for JavaScript, Pyt
 
 See the full spec: [`docs/Sierrafy_Architecture_v1.1.md`](docs/Sierrafy_Architecture_v1.1.md).
 
-## The landing page
-
-The page is a single self-contained `index.html` (inline CSS/JS, no build step). To preview locally, open the file in a browser or use the VS Code Live Server extension (port 5501 is preconfigured in `.vscode/settings.json`).
-
-Deployment instructions for Netlify are in [`docs/SETUP.md`](docs/SETUP.md).
-
 ## Contributing
 
 Contributions are welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md). The roadmap and component specs live in the architecture document.
