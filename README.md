@@ -4,7 +4,7 @@
 
 Sierra Leone has 93% NIN coverage. What it doesn't have is a developer-friendly way to use it. Sierrafy is an open-source SDK that gives any developer a clean API to verify National Identification Numbers and ID documents — self-hostable, offline-capable, free to use.
 
-> **Status: Phase 1 · in development.** This repository currently contains the project landing page and the [technical architecture specification](docs/Sierrafy_Architecture_v1.1.md). The SDK itself is not built yet — follow or watch the repo for progress.
+> **Status: Phase 1 · in development.** This repository currently contains the project landing page and the [technical architecture specification](docs/architecture/Sierrafy_Architecture_v1.1.md). The SDK itself is not built yet — follow or watch the repo for progress.
 
 ## The problem
 
@@ -22,7 +22,7 @@ Five verification layers, usable independently or together:
 
 Delivered as a self-hostable REST gateway (Docker) plus SDKs for JavaScript, Python, PHP, React Native, and Flutter. Fully offline-capable; **no biometric data is ever stored**.
 
-See the full spec: [`docs/Sierrafy_Architecture_v1.1.md`](docs/Sierrafy_Architecture_v1.1.md).
+See the full spec: [`docs/architecture/Sierrafy_Architecture_v1.1.md`](docs/architecture/Sierrafy_Architecture_v1.1.md).
 
 ## Contributing
 
@@ -30,8 +30,8 @@ Contributions are welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md). The road
 
 ## License
 
-[MIT](LICENSE) © 2026 Umaru Biango. OCR zone maps will be contributed under CC0.
+[MIT](LICENSE) © 2026 Umaru S. Biango. OCR zone maps will be contributed under CC0.
 
 ## Contact
 
-Built by Umaru · Sierra Leone — [hello@umarubiango.com](mailto:hello@umarubiango.com)
+Built by Umaru S. Biango · Sierra Leone — [hello@umarubiango.com](mailto:hello@umarubiango.com)

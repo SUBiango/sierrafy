@@ -4,8 +4,8 @@ Thanks for your interest in Sierrafy — an open-source NIN verification toolkit
 
 ## Before you start
 
-- Read the [architecture specification](docs/Sierrafy_Architecture_v1.1.md) — it defines the components, API contracts, and the non-negotiable constraints (especially **no biometric data is ever persisted** and **Phase 1 is offline-capable**).
-- Check the [open questions](docs/Sierrafy_Architecture_v1.1.md#12-open-questions-and-assumptions) — several details (NIN format, zone-map coordinates, CSCA certificate) are still unconfirmed. If you have authoritative information, that's a valuable contribution on its own.
+- Read the [architecture specification](docs/architecture/Sierrafy_Architecture_v1.1.md) — it defines the components, API contracts, and the non-negotiable constraints (especially **no biometric data is ever persisted** and **Phase 1 is offline-capable**).
+- Check the [open questions](docs/architecture/Sierrafy_Architecture_v1.1.md#12-open-questions-and-assumptions) — several details (NIN format, zone-map coordinates, CSCA certificate) are still unconfirmed. If you have authoritative information, that's a valuable contribution on its own.
 
 ## How to contribute
 
