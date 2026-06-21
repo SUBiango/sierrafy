@@ -1,0 +1,7 @@
+name: sierrafy_flutter
+description: Sierrafy Flutter SDK with NFC chip reading (eMRTD).
+version: 0.0.0
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'

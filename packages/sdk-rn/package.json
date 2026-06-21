@@ -1,0 +1,13 @@
+{
+  "name": "@sierrafy/sdk-react-native",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Sierrafy React Native SDK with NFC chip reading (eMRTD).",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest"
+  }
+}

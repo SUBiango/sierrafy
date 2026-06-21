@@ -1,0 +1,15 @@
+{
+  "name": "@sierrafy/sdk",
+  "version": "0.0.0",
+  "description": "Sierrafy core SDK — NIN validator, OCR, and fraud checks (Phase 1).",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest"
+  }
+}

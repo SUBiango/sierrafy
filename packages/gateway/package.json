@@ -1,0 +1,13 @@
+{
+  "name": "@sierrafy/gateway",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Sierrafy API gateway (Express) — orchestrates the verification layers.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest"
+  }
+}

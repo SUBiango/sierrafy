@@ -19,6 +19,8 @@ yarn-error.log*
 pnpm-debug.log*
 dist/
 build/
+*.tsbuildinfo
+coverage/
 
 # Python (for the face engine added later)
 __pycache__/

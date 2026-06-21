@@ -1,0 +1,9 @@
+[project]
+name = "sierrafy-face-engine"
+version = "0.0.0"
+description = "Sierrafy face-match microservice (FastAPI + InsightFace)."
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

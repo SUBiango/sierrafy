@@ -1,0 +1,13 @@
+{
+  "name": "@sierrafy/nfc-engine",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared NFC chip logic — MRZ/BAC, PACE/BAC, passive auth, OCR cross-check.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest"
+  }
+}
