@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/gateway" },
+    { "path": "packages/nfc-engine" },
+    { "path": "packages/sdk-js" },
+    { "path": "packages/sdk-rn" }
+  ]
+}

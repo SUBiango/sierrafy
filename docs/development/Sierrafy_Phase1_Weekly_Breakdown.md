@@ -1,6 +1,8 @@
 # Sierrafy Phase 1 — Weekly Development Breakdown
 
-**Solo-developer build plan · 18 weeks · maps to Architecture Spec v1.1 milestones M1–M12 (incl. NFC chip verification)**
+**Solo-developer build plan · Week 0 + 18 working weeks · maps to Architecture Spec v1.1 milestones M1–M12 (incl. NFC chip verification)**
+
+> **Schedule caveat:** The NFC weeks (14 RN, 15 Flutter) are the single biggest timeline risk. Each allocates one week to MRZ→BAC derivation, PACE-with-BAC-fallback, secure messaging, DG1/DG2/SOD reads, and full passive-auth chain validation across a native bridge — work that commonly runs multi-week per platform. The plan assumes stock eMRTD libraries (`react-native-nfc-manager`, `flutter_nfc_kit`, the `AndyQ/NFCPassportReader` reference) work against the eID chip **unmodified**; if §12.4 resolves to a proprietary X Infotech layout, both weeks expand. Treat W14–15 as the place to absorb slip, and hold a contingency week before M11.
 
 Each week lists the goal, concrete tasks, and **testable deliverables** (a deliverable is "done" only when the test passes). Weeks are sized for a solo developer working part-to-full time. v1.1 adds the NFC chip verifier (§4.5) as Layer 5 — the highest-confidence path available before Phase 2 — which pulls the React Native and Flutter mobile SDKs into Phase 1 and pushes the dashboard and release to M11/M12.
 
@@ -17,9 +19,9 @@ Tasks:
 - Add MIT `LICENSE`, CC0 notice for `zone-maps/`, `.env.example`, placeholder `csca-certs/` with README explaining the CSCA cert is pending NCRA.
 
 **Testable deliverables:**
-- `npm test` and `pytest` both run (even with zero tests) and exit 0 in CI.
+- `pnpm test` and `pytest` both run (even with zero tests) and exit 0 in CI.
 - A pushed commit triggers the Actions workflow and it goes green.
-- Repo clones and `npm install` succeeds on a clean machine.
+- Repo clones and `pnpm install` succeeds on a clean machine.
 
 ---
 
@@ -46,15 +48,18 @@ Tasks:
 
 Tasks:
 - Integrate Tesseract.js v5 + Sharp pre-processing (grayscale, contrast, resize).
-- Build `SL_NATIONAL_EID.json` zone map (relative coordinates).
+- Build `SL_NATIONAL_EID.json` zone map (relative coordinates). Include the **document-number and expiry-date zones** the eID chip's BAC key derivation needs in Week 14 — not just NIN/name/DOB/photo — so the eID has its own BAC inputs the way the passport does (see Week 5–6).
 - Implement cross-check: exact NIN match, fuzzy name (Levenshtein ≥85%), normalised DOB.
 - Build `/v1/ocr` endpoint returning `extracted` + `ocr_confidence`.
+- Wire the optional Google Vision OCR engine behind `OCR_ENGINE=google-vision` + `GOOGLE_VISION_KEY` (§4.2.2, §7.2); default stays `tesseract` with zero outbound calls. This is the only egress path the Week 17–18 offline-guarantee test toggles.
 
 **Testable deliverables:**
 - On a labelled set of ≥10 eID sample images, NIN field extracted correctly in ≥80% of cases (record the metric).
 - Cross-check returns `nin_matches_card: true` for matching input and `false` for a deliberately mismatched NIN.
 - Fuzzy name match passes for "AMINATA KAMARA" vs "Aminata Kamara" and fails below threshold.
 - DOB normaliser converts `17/04/1992` → `1992-04-17` (unit test).
+- eID zone map exposes document number + expiry alongside NIN/name/DOB (unit test), confirming the eID's BAC-key inputs are available before Week 14.
+- With `OCR_ENGINE=tesseract` (default) a request makes no outbound call; setting `OCR_ENGINE=google-vision` routes to the Vision path (test with the call mocked).
 
 > **Dependency:** ≥10 high-res eID samples sourced before this week (Open Question #2).
 
@@ -86,7 +91,7 @@ Tasks:
 Tasks:
 - Build `services/face-engine` (FastAPI + InsightFace buffalo_l).
 - Implement face detection, embedding, cosine similarity.
-- Enforce threshold (default 0.82, env-configurable); return `FACE_UNREADABLE` on extraction failure.
+- Enforce threshold (default 0.82, env-configurable via `MATCH_THRESHOLD` at the face service; the gateway exposes the same knob as `FACE_THRESHOLD` per §7.2 — keep the two names mapped so the W17–18 `.env.example` is consistent). Return `FACE_UNREADABLE` on extraction failure.
 - Accept a reference photo from **either** the OCR-cropped card photo **or** an NFC DG2 image, so the NFC layer can later supply a higher-quality reference.
 - Guarantee memory-only processing — no disk/DB writes of images or embeddings.
 
@@ -95,7 +100,7 @@ Tasks:
 - Threshold change via `MATCH_THRESHOLD` env var alters pass/fail outcome (test).
 - Service accepts a DG2-style reference image and returns a score (test with a sample chip photo).
 - Unreadable ID photo returns `FACE_UNREADABLE` rather than crashing.
-- Automated check confirms **no biometric bytes written to disk** during a request (filesystem watch test).
+- Automated check confirms **no biometric bytes written to disk** during a request (filesystem watch test). This test is the enforcement mechanism for `DISABLE_BIOMETRIC_STORAGE` (§7.2, must always be `true`).
 
 ---
 
@@ -124,12 +129,15 @@ Tasks:
 - Express gateway: validator → OCR → face-match (localhost call) → fraud → optional NFC cross-check → aggregate response.
 - Accept optional `nfc_data` (dg1/dg2/sod base64) in `/v1/verify` and add the `/v1/nfc-verify` endpoint stub returning the §5.2 NFC response shape.
 - Bearer API-key auth (bcrypt-hashed keys, shown once), per-key rate limiting, no payloads in logs.
-- Implement all error codes (400/422/429/500) from §5.3, including `NFC_CHIP_TAMPERED`, `NFC_ACCESS_DENIED`, and `CSCA_UNAVAILABLE`.
+- Implement the §5.3 error codes (400/422/429/500), including `NFC_CHIP_TAMPERED` and `NFC_ACCESS_DENIED`. Note `CSCA_UNAVAILABLE` is a **200** non-failure flag, not a 4xx/5xx error — wire it as a success response that carries `passive_auth_passed: null`.
+- Build the **result store** the dashboard (Week 16) reads from: persist verification results (pass/fail + score + which layers ran, no biometrics) for 30 days and request metadata (timestamp, API-key hash, latency) for 90 days, per §9.2. Retention is configurable/disable-able.
 
 **Testable deliverables:**
 - End-to-end `POST /v1/verify` returns the full §5.2 response shape (incl. `nfc_chip_authentic`, `nfc_passive_auth`, `nfc_data_matches_ocr`) with `status` PASS/REVIEW/FAIL.
 - A request with valid `nfc_data` is routed through the NFC cross-check path; a request without it skips NFC cleanly.
 - Request without a valid key → 401; over rate limit → `RATE_LIMIT_EXCEEDED` 429.
+- `CSCA_UNAVAILABLE` returns HTTP 200 (not a 4xx), with `passive_auth_passed: null` (test).
+- A completed verification writes a result row queryable by the dashboard; the row contains no image/embedding/chip-biometric bytes (test). Result rows older than 30 days and metadata older than 90 days purge (time-mocked test).
 - Log inspection test confirms no base64 image or chip data appears in access logs.
 
 ---
@@ -141,12 +149,14 @@ Tasks:
 Tasks:
 - JS SDK (TypeScript, rollup): `Sierrafy` client with `verify`, `validateNin`, `ocr`, `faceMatch`.
 - Python SDK (httpx + pydantic) with matching methods and typed responses.
+- Ship the **consent-logging utility** (§9.3): records a consent timestamp + consent-version string alongside each verification result. Surface it in both SDKs. Final consent wording is gated on the NATCOM legal review (dependency table, before Week 17) — build the mechanism now, leave the version string configurable.
 - Write quickstart docs for each.
 
 **Testable deliverables:**
 - JS SDK integration test hits a running gateway and parses a PASS result.
 - Python SDK returns `confidence_score` as an int against the same gateway.
-- `npm pack` and `python -m build` produce installable artifacts; install in a fresh venv/project and import succeeds.
+- Consent utility records timestamp + version and attaches it to a verification call (unit test); a verify without recorded consent is flagged per the SDK contract.
+- `pnpm pack` and `python -m build` produce installable artifacts; install in a fresh venv/project and import succeeds.
 - README copy-paste example runs without edits.
 
 ---
@@ -219,7 +229,7 @@ Tasks:
 - Dashboard lists recent verifications from the 30-day result store and shows which layers ran (incl. NFC chip authentic/passive-auth status); no images/embeddings/chip biometrics shown or fetchable.
 - Creating a key shows the plaintext once and never again (reload proves it's hidden).
 - Revoked key returns 401 on next request.
-- Builds via `npm run build` and serves on `:3001` in Docker Compose.
+- Builds via `pnpm run build` and serves on `:3001` in Docker Compose.
 
 ---
 

@@ -1,0 +1,9 @@
+[project]
+name = "sierrafy"
+version = "0.0.0"
+description = "Sierrafy Python client SDK wrapping the gateway."
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
