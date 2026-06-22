@@ -557,7 +557,7 @@ Authorization: Bearer sfy_live_xxxxxxxxxxxxxxxx
 ### 6.1 JavaScript / TypeScript
 
 ```bash
-npm install @sierrafy/sdk
+pnpm add @sierrafy/sdk
 ```
 
 ```typescript
@@ -630,7 +630,7 @@ echo $result['status'];  // PASS
 ### 6.4 React Native (NFC-enabled)
 
 ```bash
-npm install @sierrafy/sdk-react-native react-native-nfc-manager
+pnpm add @sierrafy/sdk-react-native react-native-nfc-manager
 ```
 
 ```typescript
