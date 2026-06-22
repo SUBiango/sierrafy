@@ -428,7 +428,7 @@ Authorization: Bearer sfy_live_xxxxxxxxxxxxxxxx
 ```json
 // Request
 {
-  "nin":           "SL2019XXXXXXXX",
+  "nin":           "ABCD1234",
   "id_image":      "<base64-jpeg>",
   "selfie":        "<base64-jpeg>",
   "full_name":     "Aminata Kamara",
@@ -463,7 +463,7 @@ Authorization: Bearer sfy_live_xxxxxxxxxxxxxxxx
     "nfc_data_matches_ocr": true
   },
   "extracted": {
-    "nin":  "SL2019XXXXXXXX",
+    "nin":  "ABCD1234",
     "name": "AMINATA KAMARA",
     "dob":  "1992-04-17"
   },
@@ -476,12 +476,12 @@ Authorization: Bearer sfy_live_xxxxxxxxxxxxxxxx
 
 ```json
 // Request
-{ "nin": "SL2019XXXXXXXX" }
+{ "nin": "ABCD1234" }
 
 // Response
 {
   "valid": true,
-  "nin": "SL2019XXXXXXXX",
+  "nin": "ABCD1234",
   "checks": { "length": true, "prefix": true, "year": true }
 }
 ```
@@ -527,7 +527,7 @@ Authorization: Bearer sfy_live_xxxxxxxxxxxxxxxx
   "passive_auth_passed": true,
   "passive_auth_status": "CSCA_VERIFIED",
   "dg1": {
-    "nin":  "SL2019XXXXXXXX",
+    "nin":  "ABCD1234",
     "name": "AMINATA KAMARA",
     "dob":  "1992-04-17",
     "expiry": "2029-08-15"
@@ -570,7 +570,7 @@ const client = new Sierrafy({
 });
 
 const result = await client.verify({
-  nin:     'SL2019XXXXXXXX',
+  nin:     'ABCD1234',
   idImage: imageBase64,
   selfie:  selfieBase64,
   options: { faceMatch: true, fraudCheck: true }
@@ -596,7 +596,7 @@ client = Sierrafy(
 )
 
 result = client.verify(
-    nin      = 'SL2019XXXXXXXX',
+    nin      = 'ABCD1234',
     id_image = image_bytes,
     selfie   = selfie_bytes,
     options  = {'face_match': True}
@@ -620,7 +620,7 @@ $client = new Client([
 ]);
 
 $result = $client->verify([
-    'nin'      => 'SL2019XXXXXXXX',
+    'nin'      => 'ABCD1234',
     'id_image' => base64_encode($imageData),
     'selfie'   => base64_encode($selfieData),
 ]);
