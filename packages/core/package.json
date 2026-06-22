@@ -9,7 +9,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc -b && node -e \"require('fs').cpSync('src/schema','dist/schema',{recursive:true})\"",
     "test": "jest"
   }
 }

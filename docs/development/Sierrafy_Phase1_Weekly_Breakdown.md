@@ -30,12 +30,12 @@ Tasks:
 **Goal:** Ship the NIN validator as the first usable artifact.
 
 Tasks:
-- Implement length, charset, prefix, year-range (2016–current), checksum, and blacklist checks.
+- Implement length, charset, checksum, and blacklist checks. (No prefix or year-range checks: real eID samples show the NIN is an 8-char alphanumeric code; the `SL`-prefixed value on the card is the separate Personal ID Number.)
 - Drive all rules from an external JSON schema file (no hard-coded format).
 - Build the `/v1/validate-nin` response shape with per-check booleans.
 
 **Testable deliverables:**
-- Unit tests: ≥10 valid NIN samples return `valid: true`; ≥10 malformed inputs (short, lowercase, bad prefix, out-of-range year) return correct `error` codes.
+- Unit tests: ≥10 valid NIN samples return `valid: true`; ≥10 malformed inputs (short, too long, lowercase, spaces, symbols) return correct `error` codes.
 - Editing the JSON schema (e.g. length 14→15) changes validator behaviour **with no code change**, proven by a test.
 - Blacklisted test NIN is rejected with the blacklist reason.
 - Coverage on the validator module ≥90%.

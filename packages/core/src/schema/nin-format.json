@@ -1,0 +1,8 @@
+{
+  "version": "0.2.0-provisional",
+  "description": "Sierra Leone NIN format derived from real eID card samples (the field labelled 'NIN'): 8 uppercase alphanumeric characters, no country prefix and no embedded year. The long 'SL...' number on the card is the separate Personal ID Number, not the NIN. Exact charset constraints and any checksum are still unconfirmed by NCRA — edit this file to change behaviour without code changes (Architecture Spec section 4.1 and 12.1).",
+  "length": 8,
+  "charset": "^[A-Z0-9]+$",
+  "checksum": { "enabled": false, "algorithm": "luhn" },
+  "blacklist": []
+}

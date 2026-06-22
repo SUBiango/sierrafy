@@ -13,6 +13,8 @@ module.exports = {
           module: 'commonjs',
           moduleResolution: 'node',
           isolatedModules: true,
+          esModuleInterop: true,
+          resolveJsonModule: true,
         },
       },
     ],
