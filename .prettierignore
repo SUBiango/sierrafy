@@ -5,3 +5,7 @@ pnpm-lock.yaml
 index.html
 docs/**
 *.md
+
+# Editor / tooling config (not project source)
+.claude/**
+*.code-workspace

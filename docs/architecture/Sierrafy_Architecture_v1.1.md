@@ -127,26 +127,28 @@ Phase 1 focuses on the two documents that are universally accepted for all publi
 
 #### 4.1.1 NIN structure
 
-The Sierra Leone NIN is a structured alphanumeric identifier assigned by NCRA. Based on publicly visible NIN samples and the format documented on NCRA eID cards, the validator enforces the following rules.
+The Sierra Leone NIN is a short alphanumeric identifier assigned by NCRA. The format below was **corrected against real eID card samples** (June 2026); an earlier draft of this spec inferred a 14-character `SL2019…` pattern, but that value is actually the card's separate **Personal ID Number** (see note), not the NIN.
 
 | Property | Specification |
 |---|---|
-| Length | 14 characters (subject to confirmation from NCRA documentation) |
+| Length | 8 characters (observed on cards; confirm with NCRA documentation) |
 | Character set | Uppercase alphanumeric — A–Z and 0–9, no special characters |
-| Structure | Prefix (2 alpha) + Year (4 digits) + Sequence (8 alphanumeric) |
-| Example pattern | `SL2019XXXXXXXX` |
-| Check digit | Luhn-style checksum on numeric segments (to be confirmed) |
+| Structure | No country prefix and no embedded year; no fixed sub-segment layout observed |
+| Example pattern | 8 × `[A-Z0-9]` (e.g. all-letters, or letters mixed with digits) |
+| Check digit | Unknown — no obvious check digit (one sample NIN ends in a letter); none enforced |
 
-> **Implementation note:** The exact NIN format specification should be confirmed directly with NCRA before release. The validator should be configurable via a JSON schema file so format rules can be updated without a code change — anticipating minor format variations across registration cohorts.
+> **Personal ID Number vs NIN:** The eID card prints **two** distinct numbers. The **Personal ID Number** is a ~19-character `SL`-prefixed value that embeds the issue date (`YYYYMMDD`, with expiry ≈ issue + 5 years) — this is the document/card number. The **NIN** is the separate 8-character alphanumeric code labelled "NIN". This SDK's validator targets the NIN; a Personal ID Number validator may be added later.
+
+> **Implementation note:** The exact NIN charset and any checksum should still be confirmed directly with NCRA before release. The validator is configurable via a JSON schema file (`packages/core/src/schema/nin-format.json`) so format rules can be updated without a code change — anticipating minor variations across registration cohorts.
 
 #### 4.1.2 Validation rules
 
-- **Length check** — reject any string not matching the expected character count
+- **Length check** — reject any string not matching the expected character count (8)
 - **Character set check** — reject lowercase, spaces, or special characters
-- **Prefix check** — verify the country/district prefix matches known codes
-- **Year range check** — embedded year must fall within 2016 (NCRA founding) to current year
-- **Checksum validation** — where applicable, validate the check digit
+- **Checksum validation** — optional, disabled by default until the algorithm (if any) is confirmed
 - **Blacklist check** — reject NINs on a developer-supplied blocklist (e.g. known test values)
+
+> Prefix and embedded-year checks were removed: they applied to the misidentified `SL…` Personal ID Number, not the NIN.
 
 #### 4.1.3 Response
 
@@ -154,22 +156,21 @@ The Sierra Leone NIN is a structured alphanumeric identifier assigned by NCRA. B
 // Valid NIN
 {
   "valid": true,
-  "nin": "SL2019XXXXXXXX",
+  "nin": "ABCD1234",
   "checks": {
     "length": true,
     "charset": true,
-    "prefix": true,
-    "year": true,
-    "checksum": true
+    "checksum": true,
+    "blacklist": true
   }
 }
 
 // Invalid NIN
 {
   "valid": false,
-  "nin": "SL19XX",
-  "error": "INVALID_LENGTH",
-  "checks": { "length": false }
+  "nin": "abcd1234",
+  "error": "INVALID_CHARSET",
+  "checks": { "length": true, "charset": false, "checksum": true, "blacklist": true }
 }
 ```
 
@@ -890,7 +891,7 @@ Initial governance is maintainer-led (solo developer). As the project gains cont
 
 > **Items requiring external confirmation before Phase 1 release**
 
-1. **Exact NIN format** — the 14-character alphanumeric pattern with prefix `SL` is inferred from public card samples. The authoritative format specification (including checksum algorithm) should be confirmed directly with NCRA before the validator is released.
+1. **Exact NIN format** — *partially resolved from real eID samples (June 2026):* the NIN is an **8-character uppercase alphanumeric** code (no `SL` prefix, no embedded year); the 14-char `SL…` value is the separate Personal ID Number. Still to confirm with NCRA: exact charset constraints (e.g. `O`/`0` handling, whether digits are always permitted) and whether any **checksum** exists. The validator ships on these observed rules with the checksum disabled until confirmed.
 
 2. **Zone map coordinates** — the pixel bounding boxes for OCR zones for both the National eID Card and Passport have been estimated from publicly available card photos. Accurate coordinates require a controlled set of high-resolution scans of each document type. Priority: source at least 10 samples per document type before M2/M3 milestones.
 

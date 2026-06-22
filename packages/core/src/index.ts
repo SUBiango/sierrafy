@@ -1,10 +1,20 @@
 /**
  * @sierrafy/sdk — core SDK.
  *
- * Phase 1 lands the NIN format validator here in Week 1 (M1), followed by the
- * OCR engine and fraud checks. This file is an intentional placeholder so the
- * package builds and tests green during the Week 0 scaffold.
+ * Phase 1: M1 ships the NIN format validator (this module). OCR and fraud
+ * checks follow in later milestones.
  */
 
-/** Package name, used as a trivial liveness export until M1 lands. */
-export const PACKAGE_NAME = '@sierrafy/sdk';
+export {
+  validateNin,
+  defaultNinFormatSchema,
+  type ValidateNinOptions,
+} from './validate-nin';
+export { luhnIsValid, extractDigits } from './luhn';
+export type {
+  NinCheckName,
+  NinErrorCode,
+  NinFormatSchema,
+  NinValidationChecks,
+  NinValidationResult,
+} from './types';
