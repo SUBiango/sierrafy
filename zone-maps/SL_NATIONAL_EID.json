@@ -1,0 +1,14 @@
+{
+  "document_type": "SL_NATIONAL_EID",
+  "provisional": true,
+  "_note": "Coordinates are relative fractions (0-1) of card width/height, estimated from Architecture Spec §4.2.3 plus 2 sample cards. PROVISIONAL until calibrated against >=10 high-resolution samples (§12.2). document_number and expiry are the BAC-key inputs the NFC layer derives in Week 14.",
+  "zones": {
+    "nin": { "x": 0.05, "y": 0.58, "w": 0.55, "h": 0.1 },
+    "surname": { "x": 0.05, "y": 0.38, "w": 0.55, "h": 0.1 },
+    "given_name": { "x": 0.05, "y": 0.46, "w": 0.55, "h": 0.1 },
+    "dob": { "x": 0.05, "y": 0.68, "w": 0.35, "h": 0.1 },
+    "document_number": { "x": 0.05, "y": 0.78, "w": 0.55, "h": 0.08 },
+    "expiry": { "x": 0.05, "y": 0.86, "w": 0.35, "h": 0.08 },
+    "photo": { "x": 0.65, "y": 0.28, "w": 0.3, "h": 0.4 }
+  }
+}

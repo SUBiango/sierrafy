@@ -11,5 +11,10 @@
   "scripts": {
     "build": "tsc -b && node -e \"require('fs').cpSync('src/schema','dist/schema',{recursive:true})\"",
     "test": "jest"
+  },
+  "dependencies": {
+    "fastest-levenshtein": "^1.0.16",
+    "sharp": "^0.35.2",
+    "tesseract.js": "^7.0.0"
   }
 }
