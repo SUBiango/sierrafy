@@ -3,11 +3,14 @@
 // traineddata over the network). We test our glue, not Tesseract itself.
 const recognizeMock = jest.fn();
 const terminateMock = jest.fn();
+const setParametersMock = jest.fn();
 
 jest.mock('tesseract.js', () => ({
+  PSM: { SINGLE_LINE: '7' },
   createWorker: jest.fn(async () => ({
     recognize: recognizeMock,
     terminate: terminateMock,
+    setParameters: setParametersMock,
   })),
 }));
 
@@ -16,9 +19,11 @@ jest.mock('sharp', () => {
     extract: jest.fn(() => chainable),
     resize: jest.fn(() => chainable),
     grayscale: jest.fn(() => chainable),
+    extractChannel: jest.fn(() => chainable),
     normalize: jest.fn(() => chainable),
+    sharpen: jest.fn(() => chainable),
     toBuffer: jest.fn(async () => Buffer.from('crop')),
-    metadata: jest.fn(async () => ({ width: 240, height: 380 })),
+    metadata: jest.fn(async () => ({ width: 240, height: 380, channels: 3 })),
   };
   return jest.fn(() => chainable);
 });
@@ -52,6 +57,20 @@ describe('tesseract engine — recognizeZones', () => {
     expect(recognizeMock).toHaveBeenCalledTimes(1); // only the nin zone
     expect(result.confidence).toBeCloseTo(0.9); // 90/100
     expect(terminateMock).toHaveBeenCalled(); // worker cleaned up
+  });
+
+  it('constrains OCR with a single-line PSM and an alphanumeric whitelist for the NIN', async () => {
+    recognizeMock.mockResolvedValue({
+      data: { text: 'ABCD1234', confidence: 80 },
+    });
+    await createTesseractEngine().recognize(Buffer.from('img'), zoneMap);
+
+    expect(setParametersMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tessedit_pageseg_mode: '7',
+        tessedit_char_whitelist: expect.stringContaining('0123456789'),
+      }),
+    );
   });
 
   it('returns zero confidence and no zones when the image has no dimensions', async () => {

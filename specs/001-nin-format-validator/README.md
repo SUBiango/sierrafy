@@ -18,7 +18,7 @@ configurable rather than hard-coded.
 | # | Feature | Spec | Milestone | Status |
 |---|---|---|---|---|
 | 1 | NIN format validator | [nin-format-validator.md](nin-format-validator.md) | M1 (Weeks 1–2) | Done |
-| 2 | OCR engine + National eID zone map | [../002-ocr-engine-eid-zone-map/spec.md](../002-ocr-engine-eid-zone-map/spec.md) | M2 (Weeks 3–4) | Planned |
+| 2 | OCR engine + National eID zone map | [../002-ocr-engine-eid-zone-map/spec.md](../002-ocr-engine-eid-zone-map/spec.md) | M2 (Weeks 3–4) | Built · offline NIN accuracy 20% (see plan §4) |
 
 From M2 onward, specs follow the github/spec-kit split — `spec.md` (the *what*),
 `plan.md` (the *how*), and `tasks.md` (ordered work) — in a per-feature folder.

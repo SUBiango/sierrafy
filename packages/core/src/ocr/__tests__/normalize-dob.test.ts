@@ -6,6 +6,11 @@ describe('normalizeDob', () => {
     expect(normalizeDob('17/04/1992')).toBe('1992-04-17');
   });
 
+  it('accepts the card dot format DD.MM.YYYY', () => {
+    expect(normalizeDob('28.04.2000')).toBe('2000-04-28');
+    expect(normalizeDob('01.05.2029')).toBe('2029-05-01');
+  });
+
   it('accepts DD-MM-YYYY and single-digit day/month', () => {
     expect(normalizeDob('17-04-1992')).toBe('1992-04-17');
     expect(normalizeDob('5/4/1992')).toBe('1992-04-05');

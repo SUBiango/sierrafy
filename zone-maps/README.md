@@ -6,8 +6,11 @@ present) and `SL_PASSPORT.json` (Week 5–6, M3).
 
 `SL_NATIONAL_EID.json` includes `document_number` and `expiry` zones beyond the
 visible NIN/name/DOB/photo — these are the BAC-key inputs the NFC layer derives
-in Week 14. It is flagged `"provisional": true` until its coordinates are
-calibrated against ≥10 high-resolution samples (§12.2).
+in Week 14 — plus a per-field `type` hint (`alnum`/`alpha`/`date`/`photo`) that
+drives the OCR character whitelist. Its coordinates are **calibrated** against 10
+real eID front samples (June 2026), so `"provisional"` is `false`; they target a
+reasonably framed, axis-aligned capture and may need card-boundary normalisation
+for heavily rotated photos.
 
 ## Licence
 

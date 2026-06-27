@@ -7,10 +7,14 @@
 > task). Each maps to a user story / AC (US#). Paths are exact.
 
 > **Status (this branch).** Phases 1–6 implemented in `packages/core/src/ocr/`:
-> 62 tests pass (1 sample-gated smoke test skipped by default), OCR module
-> coverage ≥90% on statements/lines, lint + build green. **B1/B2 remain blocked
-> on ≥10 real eID samples** — the zone map ships `"provisional": true` and the
-> ≥80%/≥10-image accuracy metric is not yet claimable.
+> 64 tests pass (1 real-sample smoke test skipped by default), OCR module
+> coverage ≥90% on statements/lines, lint + build green. **B1/B2 resolved** with
+> the 10 real samples now in `eID samples/`: zone map calibrated
+> (`"provisional": false`, per-field `type` hints), and the accuracy metric
+> **measured at 2/10 exact NIN (20%), 58% char accuracy** — below the ≥80% target
+> for understood reasons (see [`plan.md`](plan.md) §4). Engine upgraded
+> (green-channel preprocessing, per-field whitelist + single-line PSM, dot-format
+> dates).
 
 ## Phase 1 — Setup
 
@@ -71,14 +75,25 @@
 - [x] **T017** Update `zone-maps/README.md` note + the specs index
   (`specs/001-nin-format-validator/README.md`): add M2 row, flip M1 to "Done".
 
-## Blocked — gated on ≥10 real eID samples (do not mark done early)
+## Sample-dependent — resolved with the 10 real eID samples
 
-- [ ] **B1** Calibrate `SL_NATIONAL_EID.json` coordinates against ≥10 high-res
-  samples; remove `"provisional": true`. (Open Question §12.2)
-- [ ] **B2** Run AC #8: ≥80% NIN extraction over the ≥10-image labelled set;
-  record the metric. **Blocked until B1 inputs exist.**
+- [x] **B1** Calibrate `SL_NATIONAL_EID.json` against the 10 real fronts; cleared
+  `"provisional"`, added per-field `type` hints. (Open Question §12.2)
+- [x] **B2** Ran AC #8 via `packages/core/scripts/measure-ocr-accuracy.mjs`:
+  **2/10 exact NIN (20%), 58% mean char accuracy** (offline Tesseract). Recorded;
+  **below the ≥80% target** for understood reasons — see [`plan.md`](plan.md) §4.
+
+## Follow-ups to raise accuracy toward ≥80% (next milestones)
+
+- [ ] **F1** Measure the **Google Vision** engine on the same set (needs a billed
+  `GOOGLE_VISION_KEY`); the architecture's accuracy-boost path.
+- [ ] **F2** Add **card-boundary normalisation** (detect + deskew + crop to the
+  card) so fixed zones survive rotated/margin-padded captures (samples 4, 7, 8).
+- [ ] **F3** Source **higher-resolution, flat** captures; re-run the harness.
+- [ ] **F4** If NCRA confirms a **NIN checksum**, use it to auto-correct single
+  glyph confusions (`0/O`, `1/I`, `5/S`).
 
 ## Dependencies
 
-T001–T002 → T003–T005 → T006–T009 → T010 → T011–T015 → T016–T017. B1/B2 require
-≥10 real samples (external dependency) and gate the accuracy claim only.
+T001–T002 → T003–T005 → T006–T009 → T010 → T011–T015 → T016–T017. B1/B2 done with
+the real samples. F1–F4 are future accuracy work, tracked for later milestones.

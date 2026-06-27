@@ -145,9 +145,13 @@ surfaced at engine init (not an OCR result error).
    document → `DOCUMENT_UNSUPPORTED` (no throw).
 7. **Coverage** on the OCR module ≥ 90%; **no real NIN/PII values** in committed
    code or tests (synthetic fixtures only, per M1 rule and `.gitignore`).
-8. **[SAMPLE-GATED]** On a labelled set of **≥10** real eID images, NIN extracted
-   correctly in **≥80%** of cases (record the metric). **Blocked** pending ≥10
-   high-res samples — see [`plan.md`](plan.md) Blocker. Not "done" until sourced.
+8. **NIN-extraction accuracy — measured (was sample-gated).** On the labelled set
+   of **10 real eID fronts**, run the reproducible harness
+   (`packages/core/scripts/measure-ocr-accuracy.mjs`) and record the metric.
+   **Result (offline Tesseract, June 2026): 2/10 exact NIN match (20%); 58% mean
+   character accuracy.** This is **below the ≥80% target** and the gap is
+   understood, not a regression — see [`plan.md`](plan.md) §4. Re-run the harness
+   whenever the engine, zone map, or sample set changes.
 
 ## 8. Out of scope (later)
 

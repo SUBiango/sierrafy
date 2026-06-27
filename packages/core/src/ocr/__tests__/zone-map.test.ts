@@ -24,8 +24,15 @@ describe('loadZoneMap — SL_NATIONAL_EID', () => {
     }
   });
 
-  it('is flagged provisional until calibrated against ≥10 samples', () => {
-    expect(map.provisional).toBe(true);
+  it('is calibrated (not provisional) against the real sample set', () => {
+    expect(map.provisional).toBe(false);
+  });
+
+  it('tags each text zone with a content type for the OCR whitelist', () => {
+    expect(map.zones.nin?.type).toBe('alnum');
+    expect(map.zones.dob?.type).toBe('date');
+    expect(map.zones.surname?.type).toBe('alpha');
+    expect(map.zones.photo?.type).toBe('photo');
   });
 
   it('has every box within relative bounds (0–1)', () => {

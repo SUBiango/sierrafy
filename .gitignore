@@ -22,6 +22,9 @@ build/
 *.tsbuildinfo
 coverage/
 
+# Tesseract.js downloads OCR language models at runtime — never commit them.
+*.traineddata
+
 # Python (for the face engine added later)
 __pycache__/
 *.py[cod]

@@ -13,12 +13,17 @@ export type OcrEngineName = 'tesseract' | 'google-vision';
 /** Error reported on the OCR result (mirrors M1's error-as-field pattern). */
 export type OcrErrorCode = 'IMAGE_UNREADABLE' | 'DOCUMENT_UNSUPPORTED';
 
+/** Expected content of a zone — drives the OCR character whitelist. */
+export type ZoneContentType = 'alnum' | 'alpha' | 'date' | 'photo';
+
 /** A relative bounding box on the card: fractions (0–1) of width/height. */
 export interface ZoneBox {
   x: number;
   y: number;
   w: number;
   h: number;
+  /** Optional content hint; lets the engine constrain OCR per field. */
+  type?: ZoneContentType;
 }
 
 /**

@@ -43,19 +43,48 @@ zone map needs bundling into `dist/` (default: load from repo `zone-maps/`).
 - **Provisional, configurable** — unconfirmed layout lives in JSON with a
   `"provisional"` flag, not hard-coded. ✅
 
-## 4. Blocker (gate on the accuracy deliverable)
+## 4. Accuracy: measured result and the gap to ≥80% (RESOLVED — samples in)
 
-Per the agreed decision, two items are **gated on ≥10 high-resolution real eID
-samples** (Weekly Breakdown Dependency / Open Question §12.2) and must not be
-marked done until samples are sourced:
+10 real eID fronts are now in `eID samples/` (gitignored PII), unblocking both
+items that were sample-gated:
 
-- Final `SL_NATIONAL_EID.json` **coordinate calibration**.
-- The **≥80% NIN-extraction** metric on a **≥10-image** labelled set (spec AC #8).
+- **Zone calibration — done.** `SL_NATIONAL_EID.json` coordinates are measured
+  from the real cards (template is identical across all 10), `"provisional"` flag
+  cleared. The map now also carries per-field `type` hints (`alnum`/`alpha`/
+  `date`/`photo`) driving the OCR whitelist, and `document_number` + `expiry`
+  (BAC inputs).
+- **Accuracy metric — measured: 2/10 exact NIN (20%), 58% mean char accuracy**
+  via `packages/core/scripts/measure-ocr-accuracy.mjs` (offline Tesseract). This
+  is **below the ≥80% target.**
 
-Only 2 real cards exist today (`eID samples/`). Everything else is built test-first
-now against synthetic fixtures + those 2 cards; the zone map ships
-`"provisional": true`. This gate is the reason AC #8 is the only criterion not
-satisfiable in this milestone's first pass.
+**Why offline Tesseract falls short on this set (root cause, understood):**
+
+1. **Intrinsic letter/digit confusion — the dominant cause.** The NIN is an
+   8-char alphanumeric with **no checksum**, so there is nothing to disambiguate
+   `0↔O`, `1↔I`, `5↔S`, `3↔S`. Most misses are off by exactly one or two such
+   glyphs (e.g. `PQ4D1R15`→`PQ4DIRIS`). Grayscale, green-channel, and binarised
+   preprocessing all produce the *same* swaps — the model maps these glyphs
+   identically. No fixed-zone or preprocessing change resolves this.
+2. **Crop/rotation variance.** Several samples are phone/CamScanner shots
+   (rotated, margin-padded); fixed relative zones miss leading/trailing chars on
+   those (e.g. `4JMQ7PN2`→`JMQ7PN2`). Card-boundary normalisation would help.
+3. **Security-print background.** The green guilloche reduces contrast;
+   green-channel extraction mitigates but does not eliminate it.
+
+**Levers to reach ≥80% (future work, not this milestone):**
+- The optional **Google Vision engine** (`OCR_ENGINE=google-vision`) — markedly
+  stronger OCR; the architecture's designated accuracy-boost path. Wired and
+  unit-tested (mocked); not measured here (needs a billed API key).
+- **Higher-resolution, flat, axis-aligned captures** (the dependency asked for
+  *high-resolution* scans; the current set is mixed quality).
+- An **NCRA-confirmed NIN checksum**, which would let us auto-correct single
+  glyph confusions.
+
+What the engine *does* deliver well offline: the cross-check is robust because in
+the real flow the **user types the NIN** and OCR confirms it; name uses fuzzy
+matching; DOB/expiry parse the card's dot-format dates. The 20% is the cost of
+demanding a *perfect* offline read of a checksum-less code off mixed-quality
+photos — recorded honestly per AC #8.
 
 ## 5. Project structure
 

@@ -1,7 +1,8 @@
 /**
- * Date-of-birth normalisation (§4.2.4): convert the card's `DD/MM/YYYY` (or
- * `DD-MM-YYYY`) into ISO 8601 `YYYY-MM-DD` so DOBs can be compared exactly.
- * Already-ISO input is accepted as-is. Returns null for anything unparseable.
+ * Date-of-birth normalisation (§4.2.4): convert the card's day-first date into
+ * ISO 8601 `YYYY-MM-DD` so DOBs can be compared exactly. Sierra Leone eID cards
+ * print dates dot-separated (`28.04.2000`); slashes and hyphens are also
+ * accepted. Already-ISO input passes through. Returns null for unparseable input.
  */
 export function normalizeDob(input: unknown): string | null {
   if (typeof input !== 'string') return null;
@@ -14,8 +15,8 @@ export function normalizeDob(input: unknown): string | null {
     return isValidYmd(iso[1]!, iso[2]!, iso[3]!) ? value : null;
   }
 
-  // Day-first: DD/MM/YYYY or DD-MM-YYYY (also tolerates single-digit D/M)
-  const dmy = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/.exec(value);
+  // Day-first: DD.MM.YYYY / DD/MM/YYYY / DD-MM-YYYY (tolerates single-digit D/M)
+  const dmy = /^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/.exec(value);
   if (dmy) {
     const day = dmy[1]!.padStart(2, '0');
     const month = dmy[2]!.padStart(2, '0');
