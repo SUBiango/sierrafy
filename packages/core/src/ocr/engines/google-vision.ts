@@ -1,4 +1,4 @@
-import sharp from 'sharp';
+import { loadSharp } from './deps';
 import { toPixelBox } from '../zone-map';
 import type { OcrEngine, RecognitionResult, ZoneMap } from '../types';
 
@@ -35,6 +35,7 @@ async function recognizeZones(
   apiKey: string,
   doFetch: typeof fetch,
 ): Promise<RecognitionResult> {
+  const sharp = await loadSharp();
   const meta = await sharp(image).metadata();
   const width = meta.width ?? 0;
   const height = meta.height ?? 0;

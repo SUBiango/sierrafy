@@ -3,7 +3,15 @@
  *
  * Used by the NIN validator's optional checksum check. The NIN checksum
  * algorithm is unconfirmed (Architecture Spec §12.1), so this is wired but
- * disabled by default; it treats the trailing digit as the check digit.
+ * disabled by default.
+ *
+ * WARNING — this is a placeholder, not a NIN checksum. {@link luhnIsValid} runs
+ * the standard mod-10 formula over the *decimal digits extracted* from the NIN,
+ * with the last extracted digit as the check digit. That last digit is not
+ * necessarily the NIN's last character, and an all-letter NIN (a shape observed
+ * on a real card) extracts to an empty string and so fails. Enabling
+ * `checksum.enabled` before NCRA confirms an algorithm suited to an alphanumeric
+ * identifier will reject valid NINs.
  */
 
 /** Extract just the decimal digits from a string. */

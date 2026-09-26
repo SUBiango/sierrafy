@@ -59,6 +59,11 @@ items that were sample-gated:
 
 **Why offline Tesseract falls short on this set (root cause, understood):**
 
+> The `NIN`→`OCR output` examples below are **synthetic stand-ins** that reproduce
+> the same glyph-confusion and cropping failures. Real sample NINs are PII and
+> never appear in this repo — see `scripts/check-sample-pii.mjs`, which enforces
+> that in CI.
+
 1. **Intrinsic letter/digit confusion — the dominant cause.** The NIN is an
    8-char alphanumeric with **no checksum**, so there is nothing to disambiguate
    `0↔O`, `1↔I`, `5↔S`, `3↔S`. Most misses are off by exactly one or two such

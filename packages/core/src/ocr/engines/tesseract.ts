@@ -1,5 +1,4 @@
-import sharp from 'sharp';
-import { createWorker, PSM } from 'tesseract.js';
+import { loadSharp, loadTesseract, type SharpFactory } from './deps';
 import { toPixelBox } from '../zone-map';
 import type {
   OcrEngine,
@@ -15,6 +14,9 @@ import type {
  * extraction), upscales, and runs Tesseract.js with a per-field character
  * whitelist and single-line page segmentation. Makes **no outbound network
  * calls** — Tesseract runs locally on bundled traineddata.
+ *
+ * `sharp` and `tesseract.js` are optional peer dependencies loaded on the first
+ * `recognize()` call, so merely importing this module costs nothing.
  */
 export function createTesseractEngine(): OcrEngine {
   return { name: 'tesseract', recognize: recognizeZones };
@@ -33,6 +35,7 @@ async function recognizeZones(
   image: Buffer,
   zoneMap: ZoneMap,
 ): Promise<RecognitionResult> {
+  const sharp = await loadSharp();
   const meta = await sharp(image).metadata();
   const width = meta.width ?? 0;
   const height = meta.height ?? 0;
@@ -41,6 +44,7 @@ async function recognizeZones(
     return { zones: {}, confidence: 0 };
   }
 
+  const { createWorker, PSM } = await loadTesseract();
   const worker = await createWorker('eng');
   try {
     const zones: Record<string, string> = {};
@@ -51,7 +55,14 @@ async function recognizeZones(
       // The photo zone is a biometric crop for the face engine, not text.
       if (contentType === 'photo') continue;
 
-      const crop = await preprocess(image, box, width, height, hasColour);
+      const crop = await preprocess(
+        sharp,
+        image,
+        box,
+        width,
+        height,
+        hasColour,
+      );
       await worker.setParameters({
         tessedit_pageseg_mode: PSM.SINGLE_LINE,
         tessedit_char_whitelist: WHITELIST[contentType],
@@ -70,6 +81,7 @@ async function recognizeZones(
 
 /** Crop a zone, isolate text from the green background, and upscale for OCR. */
 async function preprocess(
+  sharp: SharpFactory,
   image: Buffer,
   box: ZoneBox,
   width: number,

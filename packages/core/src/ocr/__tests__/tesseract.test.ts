@@ -15,7 +15,9 @@ jest.mock('tesseract.js', () => ({
 }));
 
 jest.mock('sharp', () => {
-  const chainable = {
+  // Annotated to break the self-referential inference cycle: every stage returns
+  // `chainable` so the sharp pipeline can be chained the way the engine chains it.
+  const chainable: Record<string, jest.Mock> = {
     extract: jest.fn(() => chainable),
     resize: jest.fn(() => chainable),
     grayscale: jest.fn(() => chainable),
