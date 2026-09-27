@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sierrafy — NIN Verification SDK for Sierra Leone</title>
+<title>Sierrafy | Identity Verification SDK for Sierra Leone</title>
 <meta name="description" content="Open-source identity verification SDK for Sierra Leone developers. Verify NINs and ID documents without a live NCRA connection.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,6 +31,8 @@
     --toast-text: #a8ddb8;
     --wordmark:     #3ecf6e;
     --wordmark-dot: #2a8f4d;
+    --note-bg:     #101a13;
+    --note-accent: #2a8f4d;
   }
 
   [data-theme="light"] {
@@ -48,6 +50,8 @@
     --toast-text: #c8edd6;
     --wordmark:     #1e5c31;
     --wordmark-dot: #3ecf6e;
+    --note-bg:     #f0f7f2;
+    --note-accent: #1e7a3a;
   }
 
   html { font-size: 16px; scroll-behavior: smooth; }
@@ -167,7 +171,7 @@
     border: 1px solid var(--border);
     border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 3rem;
+    margin-bottom: 1.25rem;
   }
 
   .layer {
@@ -188,6 +192,45 @@
     font-size: 0.85rem;
     font-weight: 500;
     color: var(--text);
+  }
+
+  /* ── SCOPE NOTE ── */
+  .scope-note {
+    background: var(--note-bg);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--note-accent);
+    border-radius: 4px;
+    padding: 1.125rem 1.25rem;
+    margin-bottom: 3rem;
+  }
+
+  .scope-note-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .scope-note p + p { margin-top: 0; }
+
+  .scope-note-body {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .scope-note-body strong { color: var(--text); font-weight: 500; }
+
+  .scope-note-line {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: var(--text);
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border);
   }
 
   /* ── CTA BLOCK ── */
@@ -329,6 +372,7 @@
     .hero { padding: 3.5rem 1.25rem 3rem; }
     footer { padding: 1rem 1.25rem; }
     .input-wrap { max-width: 100%; }
+    .scope-note { padding: 1rem; }
   }
 </style>
 </head>
@@ -349,10 +393,14 @@
 
   <p class="eyebrow">Sierra Leone · Open Source · MIT · Phase 1 — In Development</p>
 
-  <h1>NIN verification,<br>built <em>for developers.</em></h1>
+  <h1>Identity verification,<br>built <em>for local developers.</em></h1>
 
   <p class="lead">
-    Sierra Leone has 93% NIN coverage. What it doesn't have is a developer-friendly way to use it. Sierrafy is an open-source SDK that gives any developer a clean API to verify National Identification Numbers and ID documents — self-hostable, offline-capable, free to use.
+    Sierra Leone has built significant national identity infrastructure through 
+    NCRA. Sierrafy is the developer tooling that sits on top of it. It is an 
+    open-source SDK that gives any developer a clean API to verify National 
+    Identification Numbers and ID documents. Self-hostable. Offline-capable. 
+    Free to use.
   </p>
 
   <div class="layers" role="list" aria-label="Verification layers">
@@ -373,6 +421,17 @@
       <p class="layer-label">Fraud detection</p>
     </div>
   </div>
+
+  <aside class="scope-note" aria-labelledby="scope-note-label">
+    <p class="scope-note-label" id="scope-note-label">Scope · what Phase 1 does not do</p>
+    <p class="scope-note-body">
+      Phase 1 verifies an ID <strong>offline</strong> — format, document OCR, face
+      match, NFC chip. It does <strong>not</strong> query the NCRA database, so it
+      cannot tell you a NIN is registered or active. Live NCRA lookups come in
+      Phase 2, as a hand-off to NCRA's own service.
+    </p>
+    <p class="scope-note-line">NCRA remains the authority. Sierrafy is the developer layer that sits above it.</p>
+  </aside>
 
   <div class="cta-row">
     <form name="notify" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="notify-form" class="input-wrap">
