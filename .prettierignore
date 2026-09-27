@@ -2,7 +2,7 @@
 **/node_modules/**
 **/coverage/**
 pnpm-lock.yaml
-index.html
+site/index.html
 docs/**
 *.md
 

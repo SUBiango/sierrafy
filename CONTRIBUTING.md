@@ -26,7 +26,7 @@ about NCRA documents and regulations.
 | `specs/` | One folder per feature, written just before that feature is built. |
 | `zone-maps/` | OCR zone maps (CC0, separate from the repository's MIT licence). |
 | `csca-certs/` | Where the NCRA CSCA root certificate will live once obtained. |
-| `index.html` | The landing page: self-contained, all CSS and JS inline, no build step. |
+| `site/` | The landing page. Netlify publishes this directory and nothing else. |
 
 The architecture spec describes the *intended* Phase 1 system. Most of it is not
 built yet. Be precise about that distinction when writing docs or issues: do not
@@ -50,10 +50,10 @@ pnpm run check:pii     # the sample-data guard described below
 CI runs lint, the PII guard, the build, and the coverage test. Run those locally
 before opening a pull request and there should be no surprises.
 
-The landing page has no build step. Open `index.html` directly, or use the VS
-Code Live Server extension, which is preconfigured on port 5501. The email
-capture form only records addresses once deployed to Netlify, not under Live
-Server.
+The landing page has no build step. Open `site/index.html` directly, or use the
+VS Code Live Server extension, which is preconfigured on port 5501 with `site/`
+as its root, so it serves what Netlify serves. The email capture form only
+records addresses once deployed to Netlify, not under Live Server.
 
 ## Project conventions
 
@@ -104,7 +104,9 @@ it configurable rather than hard-coded.
 
 ### Landing page
 
-`index.html` is self-contained, with all CSS and JS inline and no dependencies.
+`site/index.html` is self-contained, with all CSS and JS inline and no
+dependencies. Netlify publishes `site/` alone, so anything the page needs must
+live in that directory.
 
 - **Theming is driven by CSS custom properties.** Colours are defined under both
   the `[data-theme="dark"]` and `[data-theme="light"]` blocks. Add a new colour as
