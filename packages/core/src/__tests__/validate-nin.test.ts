@@ -152,6 +152,26 @@ describe('validateNin — checksum toggle', () => {
     expect(passing.checks.checksum).toBe(true);
     expect(passing.valid).toBe(true);
   });
+
+  // Pins the trap documented on `checksum.enabled`: Luhn is a placeholder that
+  // runs over the NIN's *decimal digits*, so NINs with no digits (a shape seen
+  // on a real card) and NINs whose check position lands on a letter are
+  // rejected. This test exists to fail loudly if anyone flips the default on
+  // before NCRA confirms an algorithm — not to bless the behaviour.
+  it('rejects all-letter NINs when Luhn is enabled — why it stays off', () => {
+    const schema: NinFormatSchema = {
+      ...defaultNinFormatSchema,
+      checksum: { enabled: true, algorithm: 'luhn' },
+    };
+    for (const allLetters of ['QWERTYUI', 'ASDFGHJK']) {
+      const result = validateNin(allLetters, { schema });
+      expect(result.valid).toBe(false);
+      expect(result.error).toBe('INVALID_CHECKSUM');
+    }
+    // ...and these are accepted by default, precisely because it is off.
+    expect(validateNin('QWERTYUI').valid).toBe(true);
+    expect(validateNin('ASDFGHJK').valid).toBe(true);
+  });
 });
 
 describe('luhnIsValid', () => {

@@ -1,0 +1,39 @@
+# Synthetic NIN-shaped literals allowed in tracked files.
+#
+# `scripts/check-sample-pii.mjs` fails the build on any 8-character
+# uppercase-alphanumeric literal in tracked source or docs that is not listed
+# here. That is what stops a real NIN from a card sample being pasted into a doc
+# or test — the samples themselves are gitignored, so nothing else catches it.
+#
+# Before adding a line, be sure the value is invented. If it came off a real
+# card, replace it with a synthetic stand-in and purge it from git history
+# instead. Keep the note; it is how the next person knows it is safe.
+
+# --- M1 validator test fixtures (packages/core/src/__tests__) ---
+ABCD1234   # canonical synthetic NIN, used across specs, docs and tests
+WXYZ5678   # synthetic
+QWERTYUI   # synthetic, all-letters — pins the Luhn-rejects-letters case
+ASDFGHJK   # synthetic, all-letters
+ZXCVBNM1   # synthetic
+AB12CD34   # synthetic, alternating letters/digits
+9F8E7D6C   # synthetic, trailing letter
+1A2B3C4D   # synthetic
+KK00LL11   # synthetic
+M9N8B7V6   # synthetic
+P0O9I8U7   # synthetic, exercises O/0 and I/1 look-alikes
+QWERTYU0   # synthetic, one trailing digit — the Luhn contrast case in the review
+12345678   # non-string/all-digit input case
+WXYZ9999   # synthetic mismatch value in the OCR cross-check tests
+
+# --- M2 OCR docs: synthetic stand-ins for real misread examples ---
+PQ4D1R15   # synthetic "card" value illustrating 1->I and 5->S confusion
+PQ4DIRIS   # the matching synthetic OCR misread
+4JMQ7PN2   # synthetic "card" value illustrating a dropped leading character
+
+# --- M2 OCR date-normaliser fixtures ---
+19920417   # synthetic DOB digits (1992-04-17), the spec's worked example
+
+# --- Not identifiers at all: structural tokens that match the same shape ---
+YYYYMMDD   # date-format placeholder (Architecture Spec)
+JPEG2000   # image format name (Architecture Spec)
+RESOLVED   # status word in the M2 plan

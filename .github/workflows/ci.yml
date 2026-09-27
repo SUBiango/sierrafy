@@ -6,7 +6,7 @@ on:
 
 jobs:
   node:
-    name: Node (lint + test)
+    name: Node (lint + build + test)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,8 +26,20 @@ jobs:
       - name: Lint
         run: pnpm run lint
 
+      # Real ID samples are gitignored, but prose *about* them is not — this
+      # fails the build if a real NIN is pasted into a doc, test, or comment.
+      - name: Sample-PII guard
+        run: pnpm run check:pii
+
+      # Type-checks every package. Without this, nothing in CI would: eslint is
+      # not type-aware here, and ts-jest only sees test files and what they import.
+      - name: Build (type-check)
+        run: pnpm run build
+
+      # Coverage, not just pass/fail — jest.config.js enforces the ≥90% validator
+      # coverage that the M1 spec requires (specs/001-nin-format-validator §7.6).
       - name: Test
-        run: pnpm test
+        run: pnpm run test:coverage
 
   python:
     name: Python (pytest)
