@@ -12,6 +12,17 @@ real eID front samples (June 2026), so `"provisional"` is `false`; they target a
 reasonably framed, axis-aligned capture and may need card-boundary normalisation
 for heavily rotated photos.
 
+## Where these are used from
+
+The OCR engine reads them from here during development. The `@sierrafy/sdk`
+build copies them, and this CC0 `LICENSE`, into the package as `dist/zone-maps/`,
+so an installed package is self-contained and the licence covering the copies is
+never ambiguous. `loadZoneMap` tries the bundled location first and falls back to
+this directory, so both layouts work.
+
+If you add a zone map, no build change is needed: the copy step takes every
+`.json` in this directory.
+
 ## Licence
 
 Zone maps are dedicated to the public domain under **Creative Commons CC0 1.0**

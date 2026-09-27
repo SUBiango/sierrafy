@@ -153,16 +153,36 @@ Code contributions are accepted under the [MIT License](LICENSE). OCR zone maps
 are contributed under CC0, so the community can keep layout definitions current
 as NCRA and SL Immigration revise card designs.
 
+## Branches
+
+```
+feature branch  ->  PR  ->  develop  ->  release PR  ->  main
+```
+
+- `main` is what is released and what the live site serves. Treat its history as
+  a list of releases.
+- `develop` is where merged work accumulates between releases.
+- Neither branch takes direct pushes. Open a PR, because the PR is where CI runs.
+- Feature branches are named for the spec folder they implement
+  (`002-ocr-engine-eid-zone-map`) or with a `chore/` or `fix/` prefix for work
+  that has no spec.
+- Hotfixes branch from `main`, PR into `main`, and are then merged back into
+  `develop`.
+
+Releases are cut by a `develop` into `main` PR and a tag. The full runbook is in
+[RELEASING.md](RELEASING.md); contributors do not need it.
+
 ## How to contribute
 
 1. **Open an issue first** for anything non-trivial, so we can agree on the
    approach before code is written.
-2. Fork the repository and create a feature branch
-   (`git checkout -b feature/short-description`).
-3. Keep pull requests focused: one logical change per PR.
+2. Fork the repository and create a branch from `develop`.
+3. Keep pull requests focused: one logical change per PR, targeting `develop`.
 4. Reference the related issue in your PR description.
 5. Make sure `pnpm run lint`, `pnpm run check:pii`, `pnpm run build`, and
    `pnpm run test:coverage` all pass.
+6. Add a line to the `Unreleased` section of [CHANGELOG.md](CHANGELOG.md) if the
+   change is visible to someone using the SDK.
 
 ## Governance
 

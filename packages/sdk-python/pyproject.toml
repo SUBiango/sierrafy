@@ -4,6 +4,10 @@ version = "0.0.0"
 description = "Sierrafy Python client SDK wrapping the gateway."
 requires-python = ">=3.11"
 license = { text = "MIT" }
+# Scaffold only, not built yet. This classifier makes PyPI reject an upload, so
+# an unfinished package cannot be published by accident. Remove it when the
+# package is real.
+classifiers = ["Private :: Do Not Upload"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
