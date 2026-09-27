@@ -2,46 +2,67 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Current state
+## Read CONTRIBUTING.md first
 
-This repository currently contains **only a marketing landing page, OSS scaffolding, and an architecture spec** — the SDK described in the docs does not exist yet. Be precise about this distinction: `docs/Sierrafy_Architecture_v1.1.md` describes the *intended* Phase 1 system (Core SDK, API gateway, face/NFC engines, language SDKs), none of which has been implemented. Do not treat the spec as describing existing code.
+The project's durable conventions live in [`CONTRIBUTING.md`](CONTRIBUTING.md),
+because human contributors need them too. Follow them exactly. They cover:
 
-- `index.html` — self-contained landing page (all CSS and JS inline, no build step, no dependencies)
-- `docs/Sierrafy_Architecture_v1.1.md` — the authoritative technical spec for the planned product
-- `README.md`, `LICENSE` (MIT), `CONTRIBUTING.md` — open-source scaffolding
-- `netlify.toml` — Netlify deploy config (publishes repo root, no build step, security headers)
-- `.vscode/settings.json` — Live Server configured on port 5501
+- **Architectural constraints** that are not configurable: no biometric data is
+  ever persisted, Phase 1 is fully offline-capable, NFC passive auth degrades to
+  `CSCA_UNAVAILABLE` rather than failing, and unconfirmed spec details stay
+  schema-driven rather than hard-coded.
+- **Real ID samples and PII**, including the rule that trips people up: a real NIN
+  quoted in a doc or a test is as much a leak as the image it came from. Run
+  `pnpm run check:pii`.
+- **Landing page conventions**: CSS-variable theming across both themes, the
+  mono/sans font split, the Netlify form wiring, and why the layers grid shows
+  four cards rather than five.
+- **Writing style**, including no em dashes in user-facing documents.
+- **Messaging and positioning**: partner with NCRA, never compete. Frame the gap
+  as missing developer tooling, not as NCRA being inadequate. No currency figures
+  in public copy.
+- **Development setup**: pnpm, and the four commands CI runs.
 
-This is a git repository. The brand domain is `sierrafy.dev`; the contact email across all files is `hello@umarubiango.com`.
+What follows is only the guidance specific to working here as an agent.
 
-## Running and deploying the landing page
+## State of the repository
 
-It's a static file — open `index.html` directly, or use VS Code Live Server (port 5501 is preconfigured). No build, install, lint, or test tooling exists. Deployment is Netlify (continuous deploy from git, driven by `netlify.toml`).
+Be precise about what exists versus what is specified, and do not describe
+planned components as if they are built.
 
-### Landing page conventions
+**Built and tested:** `packages/core` (`@sierrafy/sdk`) holds the M1 NIN format
+validator and the M2 OCR engine with the National eID zone map. The landing page
+and the OSS scaffolding are in place.
 
-- **Theming is CSS-variable driven.** Colors are defined as custom properties under `[data-theme="dark"]` and `[data-theme="light"]` blocks. Add new colors as variables in *both* themes rather than hardcoding. Theme is toggled via the `data-theme` attribute on `<html>` and persisted to `localStorage` under the key `sfy-theme`.
-- Fonts: IBM Plex Mono (`--mono`, used for technical/label text) and Inter (`--sans`, body). Keep this split — mono for code-like UI chrome, sans for prose.
-- The "Notify me at launch" input is a **Netlify Form** (`name="notify"`, `data-netlify="true"`, plus a hidden `form-name` field and a `bot-field` honeypot). It submits via `fetch` to `/` (the Netlify AJAX pattern) and shows a toast — it only actually captures emails once deployed to Netlify, not via local Live Server.
-- The verification layers grid shows **four** cards; NFC is folded into card 02 ("Document OCR & NFC chip") so the grid doesn't leave an orphaned fifth item wrapping. The spec still describes this as five distinct layers.
+**Specified but not built:** everything else in the architecture spec, including
+the API gateway, the face engine, the NFC engine, and all five language SDKs.
+The other `packages/*` directories are scaffolds with placeholder exports.
 
-## What the project is
+`docs/architecture/Sierrafy_Architecture_v1.1.md` describes the *intended* Phase
+1 system. It is a design document, not a description of existing code.
 
-Sierrafy is a planned open-source NIN (National Identification Number) verification SDK for Sierra Leone — letting developers verify IDs offline without a live NCRA database connection. The architecture spec defines five verification layers (NIN format validation, document OCR, face matching, fraud detection, NFC chip passive authentication) exposed via a self-hostable REST gateway plus JS/Python/PHP/React Native/Flutter SDKs.
+## Working here
 
-When implementing against the spec, note these hard constraints called out as architectural (not configurable) requirements:
+- **Check the milestone specs before changing `packages/core`.** Each feature has
+  a folder under `specs/` with its acceptance criteria. `specs/001-nin-format-validator/`
+  also has a `review.md` recording the findings from an implementation review and
+  how each was resolved; it is a useful map of the decisions behind the current
+  shape of the validator.
+- **The NIN format is provisional.** It was derived from real eID card samples,
+  not from NCRA documentation. The field labelled "NIN" is 8 uppercase
+  alphanumeric characters. The long `SL`-prefixed number on the card is the
+  separate Personal ID Number, which the validator deliberately does not target.
+  Do not "fix" the validator toward the older 14-character `SL2019XXXXXXXX`
+  pattern that early drafts of the spec inferred; that was the misidentified
+  field.
+- **Do not enable the NIN checksum.** Luhn is wired but disabled, and it runs over
+  the NIN's decimal digits, so it rejects all-letter NINs, one of the two observed
+  real shapes. It is a placeholder awaiting an NCRA-confirmed algorithm. A test
+  pins this behaviour.
+- **One outstanding task:** two real NIN values remain in the git history of
+  commits `3289b31` and `2d4cf40`. They are scrubbed from the working tree, and
+  the branch is local-only, so the purge is still cheap. See section 6 of
+  `specs/001-nin-format-validator/review.md`.
 
-- **No biometric data is ever persisted** — face images and embeddings are processed in memory and discarded after producing a match score. This is a privacy-by-design rule, not a setting.
-- **Phase 1 is fully offline-capable** — no outbound network calls unless the developer explicitly opts into Google Vision OCR.
-- **NFC passive authentication** depends on the NCRA CSCA root certificate, which is not yet obtained; until then NFC reads return `passive_auth_passed: null` with a `CSCA_UNAVAILABLE` flag rather than failing.
-
-Several spec details (exact NIN format/checksum, OCR zone-map coordinates, CSCA cert) are explicitly marked as unconfirmed assumptions in section 12 — treat them as provisional and configurable rather than authoritative.
-
-## Messaging and positioning
-
-Sierrafy aims to **partner with NCRA, not compete with it**. When writing or editing any copy (landing page, README, spec), follow these rules consistently:
-
-- Frame the gap as *missing developer-friendly tooling* for the wider ecosystem — not as NCRA being too expensive or inadequate. Credit NCRA with having built the national ID foundation; position Sierrafy as complementary middleware ("on NCRA's foundation, not around it") that hands off to live NCRA lookups in Phase 2.
-- The relevant pricing fact is NCRA's eKYC API at **~USD 30 per NIN check** (high for early-stage/high-volume builders). The older "USD 10,000/month" framing has been removed everywhere — do not reintroduce it.
-- Public landing copy carries no currency figures; that context lives in the architecture spec (§2.1, §12) only.
-- Landing-page voice is punchy and developer-focused (short, plain sentences). Keep gap → solution → developer benefit, without sounding competitive.
+The brand domain is `sierrafy.dev` and the contact email across all files is
+`hello@umarubiango.com`.
