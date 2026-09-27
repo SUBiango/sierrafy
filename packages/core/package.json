@@ -1,7 +1,7 @@
 {
   "name": "@sierrafy/sdk",
-  "version": "0.0.0",
-  "description": "Sierrafy core SDK — NIN validator, OCR, and fraud checks (Phase 1).",
+  "version": "0.1.0",
+  "description": "Sierrafy core SDK: NIN validator, OCR, and fraud checks (Phase 1).",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -18,6 +18,10 @@
     "ocr",
     "offline"
   ],
+  "engines": {
+    "node": ">=20"
+  },
+  "sideEffects": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -36,11 +40,19 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "src",
+    "!src/**/__tests__",
+    "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
-    "build": "tsc -b",
-    "test": "jest"
+    "build": "tsc -b && node scripts/copy-zone-maps.mjs",
+    "test": "jest",
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
     "fastest-levenshtein": "^1.0.16"

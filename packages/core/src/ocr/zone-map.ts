@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { DocumentType, ZoneBox, ZoneMap } from './types';
 
@@ -14,13 +14,24 @@ const REQUIRED_ZONES = [
 ] as const;
 
 /**
- * Resolve the repo-root `zone-maps/` directory. Works from both `src` (ts-jest)
- * and `dist` (built) by walking up to the package root, then to the monorepo
- * root. The zone maps are CC0 assets shipped at the repository root.
+ * Resolve the directory holding the zone maps.
+ *
+ * Two layouts have to work. In an installed package the maps are bundled at
+ * `dist/zone-maps` by the build, because walking up from `node_modules` would
+ * land outside the package and find nothing. In this monorepo they live at the
+ * repository root, since they are CC0 assets shared beyond this package.
+ *
+ * Candidates are tried in order and the first that exists wins, so a published
+ * install never depends on the repository layout.
  */
 function zoneMapsDir(): string {
-  // .../packages/core/{src|dist}/ocr -> up to repo root, then zone-maps
-  return join(__dirname, '..', '..', '..', '..', 'zone-maps');
+  const candidates = [
+    // Installed layout: .../@sierrafy/sdk/dist/ocr -> .../dist/zone-maps
+    join(__dirname, '..', 'zone-maps'),
+    // Monorepo layout: packages/core/{src|dist}/ocr -> <repo root>/zone-maps
+    join(__dirname, '..', '..', '..', '..', 'zone-maps'),
+  ];
+  return candidates.find((dir) => existsSync(dir)) ?? candidates[0]!;
 }
 
 /** Map a document type to its zone-map filename. */
