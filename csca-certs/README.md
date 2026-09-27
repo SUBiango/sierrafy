@@ -1,8 +1,9 @@
 # csca-certs
 
 Holds the **NCRA Country Signing Certificate Authority (CSCA) root certificate**
-(`SL_NCRA_CSCA.pem`) used for NFC passive authentication — the cryptographic
-root that proves eID chip data was signed by NCRA and is unaltered.
+(`SL_NCRA_CSCA.pem`) used for NFC passive authentication. It is the
+cryptographic root that proves eID chip data was signed by NCRA and is
+unaltered.
 
 ## Status: certificate pending NCRA
 
@@ -12,8 +13,8 @@ partnership ask (Architecture Spec §4.5.5, §12.4).
 
 Until the PEM is bundled here and pointed to via `NCRA_CSCA_CERT_PATH`
 (see `.env.example`), the NFC layer still reads chip data but returns
-`passive_auth_passed: null` with a `CSCA_UNAVAILABLE` flag — it does **not**
+`passive_auth_passed: null` with a `CSCA_UNAVAILABLE` flag. It does **not**
 fail the verification.
 
-Do not commit any private keys to this directory — only the public CSCA
+Do not commit any private keys to this directory. Only the public CSCA
 certificate belongs here.
