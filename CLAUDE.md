@@ -59,10 +59,11 @@ The other `packages/*` directories are scaffolds with placeholder exports.
   the NIN's decimal digits, so it rejects all-letter NINs, one of the two observed
   real shapes. It is a placeholder awaiting an NCRA-confirmed algorithm. A test
   pins this behaviour.
-- **One outstanding task:** two real NIN values remain in the git history of
-  commits `3289b31` and `2d4cf40`. They are scrubbed from the working tree, and
-  the branch is local-only, so the purge is still cheap. See section 6 of
-  `specs/001-nin-format-validator/review.md`.
+- **Real ID samples never enter the repository, and neither do values read off
+  them.** Two real NINs once reached a spec document as worked OCR examples; they
+  were scrubbed and purged from git history on 2026-09-27. `pnpm run check:pii`
+  now enforces this in CI. Use synthetic stand-ins and add them to
+  `scripts/allowed-id-literals.txt`.
 
 The brand domain is `sierrafy.dev` and the contact email across all files is
 `hello@umarubiango.com`.

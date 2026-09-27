@@ -6,8 +6,8 @@
 **Code under review:** `packages/core/src/validate-nin.ts`, `luhn.ts`, `types.ts`,
 `index.ts`, `schema/nin-format.json`, `__tests__/validate-nin.test.ts`
 **Commit:** branch `002-ocr-engine-eid-zone-map` @ `2d4cf40`
-**Status:** all 10 findings fixed in the working tree (2026-09-27) except the git
-history purge, which needs a maintainer to run it — see §6.
+**Status:** all 10 findings resolved (2026-09-27), including the git history
+purge — see §6.
 
 ## 1. Verdict
 
@@ -68,10 +68,10 @@ from history. The two commits are local to `002-ocr-engine-eid-zone-map` and not
 `main`, so an interactive rebase or `git filter-repo` is still cheap — do it before
 this branch merges, because it stops being cheap afterwards.
 
-**Fixed (partly — one manual step left).** Both values in `plan.md` are replaced
+**Fixed.** Both values in `plan.md` are replaced
 with synthetic stand-ins that reproduce the same glyph-confusion and dropped-crop
 failures, under a note saying they are synthetic. `scripts/check-sample-pii.mjs`
-now enforces the rule in CI. **The history purge is still outstanding** — see §6.
+now enforces the rule in CI, and the values are purged from git history (§6).
 
 Also worth adding: a CI guard that greps tracked files for any value in
 `ground-truth.json` and fails the build. That converts criterion 7 from an honour
@@ -389,14 +389,14 @@ Worth recording, because these are the parts later milestones should copy:
 
 ## 5. Resolution log
 
-All ten findings are addressed in the working tree. Verified by running the full
+All ten findings are resolved. Verified by running the full
 CI pipeline locally: `eslint` + `prettier --check` clean, sample-PII guard clean,
 `tsc -b` clean, **106 tests across 9 suites** (up from 31 in 1), coverage
 thresholds met.
 
 | # | Finding | Resolution | Where |
 |---|---|---|---|
-| 1 | Real NINs committed | Scrubbed; CI guard added. **History purge outstanding — §6** | `specs/002-.../plan.md`, `scripts/check-sample-pii.mjs`, `scripts/allowed-id-literals.txt` |
+| 1 | Real NINs committed | Scrubbed, purged from history, CI guard added (§6) | `specs/002-.../plan.md`, `scripts/check-sample-pii.mjs`, `scripts/allowed-id-literals.txt` |
 | 2 | `validateNin` could throw | Typed schema validation at load / first use; charset regexes cached | `src/nin-format-schema.ts`, `src/validate-nin.ts` |
 | 3 | Luhn rejects all-letter NINs | Comment corrected; warning in 5 places; behaviour pinned by test | `src/luhn.ts`, `src/types.ts`, `src/schema/nin-format.json`, spec §3, README |
 | 4 | Unknown algorithm failed open | Rejected by the validator; dispatch now fails closed | `src/nin-format-schema.ts`, `src/validate-nin.ts` |
@@ -416,44 +416,38 @@ Two fixes changed the spec rather than only the code: §7 gained criteria 8 and 
 (schema validation, packaging), and criteria 6 and 7 were rewritten from measured
 claims into enforced ones.
 
-## 6. Outstanding: purge the leaked NINs from git history
+## 6. Resolved: the leaked NINs are purged from git history
 
-This is the one item left, and it needs a maintainer to run it — rewriting
-published-looking history is not a change to make unattended.
+Done on 2026-09-27. Criterion 7 is now fully met, and the CI guard keeps it that
+way.
 
-The two real NINs are scrubbed from the working tree, but they remain in commits
-`3289b31` and `2d4cf40`. Both are **local-only**: the branch
-`002-ocr-engine-eid-zone-map` has no upstream, and `git branch -r --contains
-3289b31` returns nothing, so no force-push is involved and nobody else has the
-objects. That is what makes this cheap right now and expensive after the branch
-merges.
+**One correction to what §3 finding 1 recorded.** It named commits `3289b31` and
+`2d4cf40` as carrying the values. Only `2d4cf40` did. `3289b31` created `plan.md`
+but not the lines holding the misread examples; it was attributed from the file's
+commit history rather than from its content, which is the wrong test. A scan of
+every blob reachable from every ref confirmed the values existed in exactly one
+path, in one blob version, and in no commit message.
 
-The values live in exactly two lines of one file, so a text replacement across
-history is enough:
+The rewrite used `git filter-branch --tree-filter` over `2d4cf40^..HEAD` (five
+commits) rather than `git filter-repo`, which was not installed. It replaced the
+two real values and their paired OCR-misread strings with the synthetic
+stand-ins, so the history now matches the working tree rather than showing a
+scrub as a later diff.
 
-```sh
-# 1. Commit the current fixes first, so the rewrite has a clean tree to work on.
-#    (Leave your unrelated .gitignore / index.html edits unstaged.)
+Verified before the backups were dropped:
 
-# 2. Replace the two values everywhere in history. Get them from
-#    "eID samples/ground-truth.json" — samples[0].nin and samples[6].nin.
-cat > /tmp/nin-replacements.txt <<'EOF'
-<samples[0].nin>==>PQ4D1R15
-<samples[6].nin>==>4JMQ7PN2
-EOF
+- Every file in the rewritten `HEAD` tree is byte-identical to the pre-rewrite
+  tree, `plan.md` included, so the rewrite changed history without changing any
+  content.
+- No blob reachable from the branch contains a ground-truth value.
+- Build, the 106 tests, and `scripts/check-sample-pii.mjs` all still pass.
 
-pipx install git-filter-repo   # or: brew install git-filter-repo
-git filter-repo --force --replace-text /tmp/nin-replacements.txt
-rm /tmp/nin-replacements.txt
+Then `refs/original`, the backup tag, and all reflogs were expired and
+`git gc --prune=now` was run, making the old objects unreachable. A final scan
+over `git rev-list --objects --all --reflog --indexed-objects` (136 text blobs)
+and over the full `git log --all --reflog -p` output found nothing. The off-repo
+backup bundle was deleted, since it contained the values being purged.
 
-# 3. Confirm nothing survives, then re-run the guard.
-git log -p --all | grep -c '<samples[0].nin>'   # expect 0
-node scripts/check-sample-pii.mjs
-```
-
-`git filter-repo` is not installed on this machine, hence the install step.
-`git filter-branch --tree-filter` over these five commits would also work if
-installing is inconvenient. Either way `filter-repo` rewrites every commit hash on
-the branch, which is harmless here precisely because nothing tracks it yet.
-
-After the purge, criterion 7 is fully met and the CI guard keeps it that way.
+Every commit hash on the branch changed as a result. That was harmless precisely
+because the branch had no upstream and no other ref contained the rewritten
+commits, which is why doing this before the first push mattered.
