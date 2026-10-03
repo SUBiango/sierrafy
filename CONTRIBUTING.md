@@ -105,23 +105,41 @@ it configurable rather than hard-coded.
 ### Landing page
 
 `site/index.html` is self-contained, with all CSS and JS inline and no
-dependencies. Netlify publishes `site/` alone, so anything the page needs must
-live in that directory.
+dependencies beyond Google Fonts. Netlify publishes `site/` alone, so anything
+the page needs must live in that directory. The design source is
+`docs/mockup/`, which also carries the full handoff document.
 
-- **Theming is driven by CSS custom properties.** Colours are defined under both
-  the `[data-theme="dark"]` and `[data-theme="light"]` blocks. Add a new colour as
-  a variable in *both* themes rather than hard-coding it. The theme is toggled by
-  the `data-theme` attribute on `<html>` and persisted to `localStorage` under the
-  key `sfy-theme`.
-- **Keep the font split.** IBM Plex Mono (`--mono`) is for technical and label
-  text, the code-like chrome of the page. Inter (`--sans`) is for prose.
-- **The email capture is a Netlify Form** (`name="notify"`, `data-netlify="true"`,
-  a hidden `form-name` field, and a `bot-field` honeypot). It submits by `fetch`
-  to `/`, the Netlify AJAX pattern, and shows a toast.
-- **The verification layers grid shows four cards, not five.** NFC is folded into
-  card 02, "Document OCR & NFC chip", so the grid does not leave an orphaned fifth
-  item wrapping. The architecture spec still describes these as five distinct
-  layers, which is correct; the grid is a layout decision.
+- **Theming is driven by CSS custom properties.** Every colour is defined once
+  under `:root` and redefined under `[data-theme="light"]`. Add a new colour as a
+  token in *both* themes rather than hard-coding a hex value, or it will not
+  follow the theme. The theme is set by the `data-theme` attribute on `<html>`,
+  persisted to `localStorage` under `sfy-theme`, and applied by an inline script
+  in `<head>` before first paint so there is no flash.
+- **Two things deliberately do not theme.** Code surfaces (the JSON response
+  panel and the code card) carry `.dark-island`, which redeclares the dark tokens
+  locally so code always renders on dark. The sample ID card uses fixed
+  `--card-*` tokens so it looks identical in both themes.
+- **Three fonts, by role.** Bricolage Grotesque (`--font-display`) for headings,
+  IBM Plex Sans (`--font-body`) for prose, JetBrains Mono (`--font-mono`) for
+  eyebrows, code, endpoints and JSON. All three are OFL licensed.
+- **The sample card is fictional and must stay that way.** The NIN is
+  `K7M2QX4P` and the person is "Aminata Kamara". It carries no coat of arms, no
+  "Republic of Sierra Leone" wording and no NCRA marks, its MRZ uses `SFY` rather
+  than a real country code, and it keeps the SPECIMEN watermark and the "NOT A
+  REAL DOCUMENT" label. Never substitute a real card, photo or NIN. Any new
+  identifier on the page also needs an entry in
+  `scripts/allowed-id-literals.txt`, or the PII guard fails the build.
+- **Every layer on the page carries a build status.** The page shows the whole
+  Phase 1 API, including endpoints that do not exist yet, so each row has a
+  `.pill-status` saying whether it is in the SDK, experimental, or in
+  development. When a milestone ships, move its pill. A page that presents
+  planned work as available is the specific failure this guards against.
+- **The hero animation** runs only while in view and while the tab is visible,
+  and renders a static finished state under `prefers-reduced-motion`.
+- **There is no email capture form.** The earlier holding page had a Netlify
+  form; the launch page replaced it with the install command. If a launch list is
+  wanted again, it needs the Netlify form attributes back
+  (`data-netlify`, a hidden `form-name`, a `bot-field` honeypot).
 
 ### Writing style
 
