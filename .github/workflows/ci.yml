@@ -11,9 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # No `version` input on purpose. pnpm/action-setup@v4 errors out when the
+      # workflow and package.json both name a version, and `packageManager` in
+      # package.json is the better source: it pins an exact patch, so CI and a
+      # contributor's machine run the same pnpm.
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - uses: actions/setup-node@v4
         with:
