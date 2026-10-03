@@ -2,17 +2,20 @@ import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 /**
- * The docs are served at sierrafy.dev/docs/. The landing page at the site root
- * is a separate hand-built file, so this builds into `site/docs` and Netlify
- * publishes `site/` as a whole.
+ * The docs are their own Netlify site at docs.sierrafy.dev, separate from the
+ * hand-built landing page at sierrafy.dev.
+ *
+ * Keeping them apart means the landing page deploys with no build step and no
+ * dependencies, and `baseUrl` stays '/', so assets are referenced relative to
+ * the site root and the build can be served from any directory.
  */
 const config: Config = {
   title: 'Sierrafy',
   tagline: 'Identity verification for Sierra Leone, built in the open',
   favicon: 'img/favicon.svg',
 
-  url: 'https://sierrafy.dev',
-  baseUrl: '/docs/',
+  url: 'https://docs.sierrafy.dev',
+  baseUrl: '/',
 
   organizationName: 'SUBiango',
   projectName: 'sierrafy',
@@ -49,7 +52,11 @@ const config: Config = {
           position: 'left',
           label: 'Docs',
         },
-        { href: 'https://sierrafy.dev/', label: 'Home', position: 'right' },
+        {
+          href: 'https://sierrafy.dev/',
+          label: 'sierrafy.dev',
+          position: 'right',
+        },
         {
           href: 'https://github.com/SUBiango/sierrafy',
           label: 'GitHub',

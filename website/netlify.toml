@@ -1,0 +1,27 @@
+# Netlify configuration for docs.sierrafy.dev.
+#
+# A second Netlify site pointed at this directory as its base. Keeping it
+# separate from sierrafy.dev means the landing page deploys with no build step,
+# and a failing docs build cannot block it.
+
+[build]
+  base = "website"
+  publish = "build"
+  command = "pnpm install --frozen-lockfile && pnpm run build"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+
+# Docusaurus fingerprints its assets, so they are safe to cache hard.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

@@ -13,6 +13,7 @@
     "docs:dev": "pnpm --filter @sierrafy/website start",
     "docs:build": "pnpm --filter @sierrafy/website build",
     "docs:serve": "pnpm --filter @sierrafy/website serve",
+    "site:dev": "python3 -m http.server 4000 --directory site",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage --passWithNoTests",
     "check:pii": "node scripts/check-sample-pii.mjs",

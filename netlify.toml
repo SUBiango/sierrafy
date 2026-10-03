@@ -1,19 +1,16 @@
-# Netlify configuration for sierrafy.dev.
+# Netlify configuration for sierrafy.dev, the landing page.
 #
-# `site/` holds the landing page (hand-built, committed) and `site/docs/`, which
-# the Docusaurus build in `website/` writes into and which is gitignored. One
-# publish directory serves both, so the docs live at sierrafy.dev/docs/ without
-# a redirect or a second site.
+# The page is a single self-contained file, so there is nothing to build and
+# nothing in the deploy path that could be compromised. The documentation is a
+# separate Netlify site at docs.sierrafy.dev, configured in website/netlify.toml,
+# so a docs build cannot affect this one.
 #
-# Publishing the repository root, which is what this did before the SDK monorepo
-# landed, also served packages/, specs/ and docs/ from the public domain.
+# `site/` alone is published. Publishing the repository root, which is what this
+# did before the SDK monorepo landed, also served packages/, specs/ and docs/.
 
 [build]
   publish = "site"
-  command = "pnpm install --frozen-lockfile && pnpm --filter @sierrafy/website build"
-
-[build.environment]
-  NODE_VERSION = "22"
+  command = ""
 
 # Security headers: sensible defaults for a static identity-project site.
 [[headers]]
@@ -23,9 +20,3 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-
-# Docusaurus fingerprints its assets, so they are safe to cache hard.
-[[headers]]
-  for = "/docs/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"

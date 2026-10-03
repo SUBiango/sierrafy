@@ -5,8 +5,8 @@
   "description": "Sierrafy documentation site (Docusaurus).",
   "scripts": {
     "start": "docusaurus start",
-    "build": "docusaurus build --out-dir ../site/docs",
-    "serve": "docusaurus serve --dir ../site/docs",
+    "build": "docusaurus build",
+    "serve": "docusaurus serve",
     "clear": "docusaurus clear",
     "typecheck": "tsc --noEmit"
   },

@@ -8,7 +8,6 @@ module.exports = tseslint.config(
       '**/node_modules/**',
       '**/coverage/**',
       // Docusaurus build output and cache (generated, gitignored).
-      'site/docs/**',
       'website/build/**',
       'website/.docusaurus/**',
       'site/index.html',

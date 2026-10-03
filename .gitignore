@@ -39,11 +39,9 @@ eID samples/
 samples/
 *.eid-sample.*
 
-# Docusaurus builds into site/docs, which Netlify publishes alongside the
-# landing page. Generated output, never committed.
-site/docs/
-website/.docusaurus/
+# Docusaurus build output and cache. Generated, never committed.
 website/build/
+website/.docusaurus/
 
 # Netlify
 .netlify/
