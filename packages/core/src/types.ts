@@ -1,3 +1,9 @@
+/** Checksum algorithms the validator knows how to run. */
+export const CHECKSUM_ALGORITHMS = ['luhn'] as const;
+
+/** A checksum algorithm name the validator accepts. */
+export type ChecksumAlgorithm = (typeof CHECKSUM_ALGORITHMS)[number];
+
 /** Names of the individual checks the NIN validator performs. */
 export type NinCheckName = 'length' | 'charset' | 'checksum' | 'blacklist';
 
@@ -23,10 +29,16 @@ export interface NinFormatSchema {
   length: number;
   /** Anchored regex (source string) of the allowed character set. */
   charset: string;
-  /** Optional check-digit validation; disabled until the algorithm is confirmed. */
+  /**
+   * Optional check-digit validation; disabled until NCRA confirms an algorithm.
+   *
+   * WARNING: the only wired algorithm is Luhn, which runs over the NIN's decimal
+   * digits and therefore rejects all-letter NINs — a shape observed on a real
+   * card. Do not enable it as a general integrity check.
+   */
   checksum: {
     enabled: boolean;
-    algorithm: 'luhn';
+    algorithm: ChecksumAlgorithm;
   };
   /** Exact NINs to reject (e.g. known test values). */
   blacklist: string[];

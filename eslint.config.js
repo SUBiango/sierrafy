@@ -7,7 +7,7 @@ module.exports = tseslint.config(
       '**/dist/**',
       '**/node_modules/**',
       '**/coverage/**',
-      'index.html',
+      'site/index.html',
       'docs/**',
       // Root CommonJS tooling config — not part of the TS source graph.
       '*.config.js',

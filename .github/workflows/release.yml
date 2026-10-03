@@ -1,0 +1,123 @@
+name: Release
+
+# Publishing is driven by a tag on `main`, so a release is always something that
+# went through the develop -> main PR. See RELEASING.md.
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish @sierrafy/sdk
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the GitHub Release
+      id-token: write # npm provenance (OIDC)
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # A tag must not be able to publish something that would fail CI, so every
+      # gate runs again here rather than trusting the branch build.
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Sample-PII guard
+        run: pnpm run check:pii
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Test
+        run: pnpm run test:coverage
+
+      # Catches the mistake of tagging v0.2.0 while the manifest still says 0.1.0,
+      # which would otherwise publish the wrong version under the right tag.
+      - name: Verify the tag matches the package version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG=$(node -p "require('./packages/core/package.json').version")
+          echo "tag=$TAG package=$PKG"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match @sierrafy/sdk version $PKG"
+            exit 1
+          fi
+
+      # `files` is easy to get wrong in a way that only breaks at runtime, so
+      # assert the assets the package cannot work without are actually in it.
+      - name: Verify the tarball contents
+        working-directory: packages/core
+        run: |
+          npm pack --dry-run 2>&1 | tee /tmp/pack.txt
+          for f in dist/schema/nin-format.json dist/zone-maps/SL_NATIONAL_EID.json LICENSE dist/nin.js; do
+            if ! grep -q " $f\$" /tmp/pack.txt; then
+              echo "::error::$f is missing from the tarball"
+              exit 1
+            fi
+            echo "ok $f"
+          done
+          if grep -q '__tests__' /tmp/pack.txt; then
+            echo "::error::tests would be published"
+            exit 1
+          fi
+
+      # Installs the built tarball into an empty project with no native deps, the
+      # way a consumer would. The monorepo layout hides packaging bugs; this does
+      # not. See RELEASING.md step 4.
+      - name: Smoke-test the tarball as a consumer would
+        run: |
+          TARBALL="$(cd packages/core && npm pack --silent | tail -1)"
+          mkdir -p /tmp/consumer && cd /tmp/consumer && npm init -y >/dev/null
+          npm install --no-audit --no-fund "$GITHUB_WORKSPACE/packages/core/$TARBALL"
+          node -e "
+            const { validateNin } = require('@sierrafy/sdk/nin');
+            const r = validateNin('ABCD1234');
+            if (!r.valid) { console.error('validator broken in the published layout'); process.exit(1); }
+            const heavy = Object.keys(require.cache).filter(p => /sharp|tesseract/.test(p));
+            if (heavy.length) { console.error('subpath pulled in native deps:', heavy); process.exit(1); }
+            console.log('validator ok, no native deps loaded');
+          "
+          node -e "
+            require('@sierrafy/sdk').ocr(Buffer.from('x')).then(
+              () => { console.error('ocr should not succeed without sharp'); process.exit(1); },
+              e => {
+                if (!/optional peer dependency/.test(e.message)) {
+                  console.error('unhelpful error without sharp:', e.message); process.exit(1);
+                }
+                console.log('ocr fails with a clear message, as intended');
+              });
+          "
+
+      - name: Publish to npm
+        run: pnpm publish --filter @sierrafy/sdk --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: 'true'
+
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes "See [CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/main/CHANGELOG.md) for what changed.
+
+          \`\`\`sh
+          npm install @sierrafy/sdk
+          \`\`\`"

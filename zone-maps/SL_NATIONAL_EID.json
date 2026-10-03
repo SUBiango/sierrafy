@@ -1,0 +1,32 @@
+{
+  "document_type": "SL_NATIONAL_EID",
+  "provisional": false,
+  "_note": "Coordinates are relative fractions (0-1) of card width/height, calibrated against 10 real National eID front samples (June 2026). They target a reasonably framed, axis-aligned capture of the card; heavily rotated or margin-padded photos may need card-boundary normalisation first. document_number and expiry are the BAC-key inputs the NFC layer derives in Week 14. 'type' drives the OCR character whitelist per field.",
+  "zones": {
+    "surname": {
+      "x": 0.355,
+      "y": 0.295,
+      "w": 0.22,
+      "h": 0.075,
+      "type": "alpha"
+    },
+    "given_name": {
+      "x": 0.355,
+      "y": 0.395,
+      "w": 0.24,
+      "h": 0.075,
+      "type": "alpha"
+    },
+    "dob": { "x": 0.55, "y": 0.605, "w": 0.22, "h": 0.07, "type": "date" },
+    "document_number": {
+      "x": 0.55,
+      "y": 0.705,
+      "w": 0.35,
+      "h": 0.07,
+      "type": "alnum"
+    },
+    "expiry": { "x": 0.35, "y": 0.8, "w": 0.21, "h": 0.075, "type": "date" },
+    "nin": { "x": 0.53, "y": 0.8, "w": 0.3, "h": 0.085, "type": "alnum" },
+    "photo": { "x": 0.045, "y": 0.245, "w": 0.275, "h": 0.615, "type": "photo" }
+  }
+}

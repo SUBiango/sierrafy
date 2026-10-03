@@ -1,15 +1,76 @@
 {
   "name": "@sierrafy/sdk",
-  "version": "0.0.0",
-  "description": "Sierrafy core SDK — NIN validator, OCR, and fraud checks (Phase 1).",
+  "version": "0.1.0",
+  "description": "Sierrafy core SDK: NIN validator, OCR, and fraud checks (Phase 1).",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SUBiango/sierrafy.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://sierrafy.dev",
+  "bugs": "https://github.com/SUBiango/sierrafy/issues",
+  "keywords": [
+    "sierra-leone",
+    "nin",
+    "identity",
+    "kyc",
+    "ocr",
+    "offline"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "sideEffects": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./nin": {
+      "types": "./dist/nin.d.ts",
+      "default": "./dist/nin.js"
+    },
+    "./ocr": {
+      "types": "./dist/ocr/index.d.ts",
+      "default": "./dist/ocr/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
-    "dist"
+    "dist",
+    "src",
+    "!src/**/__tests__",
+    "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
-    "build": "tsc -b && node -e \"require('fs').cpSync('src/schema','dist/schema',{recursive:true})\"",
-    "test": "jest"
+    "build": "tsc -b && node scripts/copy-zone-maps.mjs",
+    "test": "jest",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "fastest-levenshtein": "^1.0.16"
+  },
+  "peerDependencies": {
+    "sharp": "^0.35.2",
+    "tesseract.js": "^7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "sharp": {
+      "optional": true
+    },
+    "tesseract.js": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "sharp": "^0.35.2",
+    "tesseract.js": "^7.0.0"
   }
 }

@@ -1,8 +1,8 @@
 {
   "name": "sierrafy",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
-  "description": "Open-source NIN verification SDK for Sierra Leone — monorepo root",
+  "description": "Open-source identity verification SDK for Sierra Leone (monorepo root)",
   "license": "MIT",
   "packageManager": "pnpm@9.15.9",
   "engines": {
@@ -11,6 +11,8 @@
   "scripts": {
     "build": "tsc -b",
     "test": "jest --passWithNoTests",
+    "test:coverage": "jest --coverage --passWithNoTests",
+    "check:pii": "node scripts/check-sample-pii.mjs",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write ."
   },

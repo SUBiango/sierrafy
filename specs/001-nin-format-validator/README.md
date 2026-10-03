@@ -17,7 +17,13 @@ configurable rather than hard-coded.
 
 | # | Feature | Spec | Milestone | Status |
 |---|---|---|---|---|
-| 1 | NIN format validator | [nin-format-validator.md](nin-format-validator.md) | M1 (Weeks 1–2) | In progress |
+| 1 | NIN format validator | [nin-format-validator.md](nin-format-validator.md) · [review](review.md) | M1 (Weeks 1–2) | Done · reviewed; all 10 findings fixed except the git-history purge (review §6) |
+| 2 | OCR engine + National eID zone map | [../002-ocr-engine-eid-zone-map/spec.md](../002-ocr-engine-eid-zone-map/spec.md) | M2 (Weeks 3–4) | Built · offline NIN accuracy 20% (see plan §4) |
 
-Specs for OCR, passport/MRZ, face match, fraud detection, the gateway, the
-SDKs, and the NFC layer are added as each milestone begins.
+From M2 onward, specs follow the github/spec-kit split — `spec.md` (the *what*),
+`plan.md` (the *how*), and `tasks.md` (ordered work) — in a per-feature folder.
+
+Specs for passport/MRZ, face match, fraud detection, the gateway, the SDKs, and
+the NFC layer are added as each milestone begins.
+
+

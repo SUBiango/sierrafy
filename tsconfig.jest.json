@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  // Compiler settings ts-jest uses for tests. Extends the repo base so test
+  // files are held to the same strictness as the code they cover; overrides only
+  // what the CommonJS test runtime needs.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "noEmit": true,
+    "types": ["node", "jest"]
+  }
+}
