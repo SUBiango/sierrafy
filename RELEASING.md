@@ -110,15 +110,22 @@ If CI is broken and a release genuinely cannot wait, `npm publish --no-provenanc
 from `packages/core` works. Treat it as an incident, not a shortcut: the
 published artifact is then unverifiable.
 
+Note that provenance proves where an artifact was built, not that the build was
+clean. See [docs/development/supply-chain.md](docs/development/supply-chain.md)
+for what that does and does not protect.
+
 ## One-time setup
 
-- **Claim the names before publishing anything.** The `@sierrafy` scope on npm,
-  `sierrafy` and `sierrafy-face-engine` on PyPI, and `sierrafy/sdk` on Packagist.
-  The roadmap is public, so the names are guessable, and the fix is free only
-  until someone takes them.
-- **Add an `NPM_TOKEN` secret** to the repository, an automation token with
-  publish rights on the `@sierrafy` scope.
-- **Protect `main` and `develop`** as described above.
+npm account setup, claiming the names, the first publish, and the move to trusted
+publishing are covered in
+[docs/development/npm-publishing.md](docs/development/npm-publishing.md). Read it
+before the first release; this runbook assumes it is done.
+
+The short version: the first publish of a new package cannot use OIDC, so it
+needs a short-lived token once, after which trusted publishing removes the stored
+credential entirely.
+
+Also **protect `main` and `develop`** as described above.
 
 ## If a release is wrong
 
