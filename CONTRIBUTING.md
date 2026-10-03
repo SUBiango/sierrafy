@@ -106,8 +106,11 @@ it configurable rather than hard-coded.
 
 `site/index.html` is self-contained, with all CSS and JS inline and no
 dependencies beyond Google Fonts. Netlify publishes `site/` alone, so anything
-the page needs must live in that directory. The design source is
-`docs/mockup/`, which also carries the full handoff document.
+the page needs must live in that directory. `docs/mockup/` is the design
+source and carries the full handoff document, but it is a visual reference only:
+it describes the finished Phase 1 system, so `site/index.html` is authoritative
+for copy and deliberately differs where the mockup claims something that is not
+built.
 
 - **Theming is driven by CSS custom properties.** Every colour is defined once
   under `:root` and redefined under `[data-theme="light"]`. Add a new colour as a
