@@ -7,6 +7,10 @@ module.exports = tseslint.config(
       '**/dist/**',
       '**/node_modules/**',
       '**/coverage/**',
+      // Docusaurus build output and cache (generated, gitignored).
+      'site/docs/**',
+      'website/build/**',
+      'website/.docusaurus/**',
       'site/index.html',
       'docs/**',
       // Root CommonJS tooling config — not part of the TS source graph.
