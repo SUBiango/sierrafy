@@ -1,0 +1,20 @@
+# Keeps the SHA-pinned actions in release.yml current.
+#
+# Dependabot understands the `uses: owner/repo@<sha> # vX.Y.Z` convention and
+# raises a PR that updates both the SHA and the comment, so pinning does not mean
+# going stale. Without this, pinning trades one risk for another.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore(ci)
+    labels:
+      - dependencies
+    groups:
+      # One PR a week for routine action bumps rather than four.
+      actions:
+        patterns:
+          - '*'
