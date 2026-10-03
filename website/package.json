@@ -6,6 +6,7 @@
   "scripts": {
     "start": "docusaurus start",
     "build": "docusaurus build --out-dir ../site/docs",
+    "serve": "docusaurus serve --dir ../site/docs",
     "clear": "docusaurus clear",
     "typecheck": "tsc --noEmit"
   },

@@ -50,10 +50,31 @@ pnpm run check:pii     # the sample-data guard described below
 CI runs lint, the PII guard, the build, and the coverage test. Run those locally
 before opening a pull request and there should be no surprises.
 
+### Running the site locally
+
 The landing page has no build step. Open `site/index.html` directly, or use the
 VS Code Live Server extension, which is preconfigured on port 5501 with `site/`
-as its root, so it serves what Netlify serves. The email capture form only
-records addresses once deployed to Netlify, not under Live Server.
+as its root.
+
+The documentation site does have a build step, and it is a Docusaurus site served
+under `/docs/`:
+
+```sh
+pnpm run docs:dev     # dev server with hot reload, at localhost:3000/docs/
+pnpm run docs:build   # production build into site/docs (gitignored)
+pnpm run docs:serve   # preview that build, at localhost:3000/docs/
+```
+
+**Do not open `site/docs/index.html` in a browser, and do not serve `site/docs`
+as the web root.** Neither works. The site is built with `baseUrl: '/docs/'`, so
+every asset is referenced by an absolute path like `/docs/assets/main.js`.
+Opening the file directly makes the browser look for those at your filesystem
+root, and serving `site/docs` as the root makes it look for
+`site/docs/docs/assets/...`. Either way the page loads without styles or
+JavaScript.
+
+Use `pnpm run docs:serve`, or serve `site/` as the web root and visit `/docs/`,
+which is exactly what Netlify does.
 
 ## Project conventions
 
