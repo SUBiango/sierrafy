@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sierrafy: identity verification for Sierra Leone, built in the open</title>
+<title>Sierrafy — identity verification for Sierra Leone, built in the open</title>
 <meta name="description" content="Open-source SDK for verifying Sierra Leonean eID cards and passports: NIN validation, document OCR, face matching and NFC chip reading. Self-hosted, offline-capable, MIT licensed.">
 <meta property="og:title" content="Sierrafy">
 <meta property="og:description" content="Identity verification for Sierra Leone, built in the open.">
@@ -271,16 +271,6 @@ section.block { padding-top: var(--section-gap); }
 .check.future .check-n { color: var(--text-4); }
 .check.future strong { color: var(--text-3); }
 .check.future .check-desc { color: var(--text-4); }
-/* Per-layer build status. The page shows the full Phase 1 API, so each row has
-   to say whether it exists yet; otherwise the endpoints read as live. */
-.tab-soon { font-size: 10px; letter-spacing: .04em; color: var(--text-4); border: 1px solid var(--border-3); border-radius: 999px; padding: 1px 5px; margin-left: 5px; }
-.pill-status { font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em;
-  text-transform: uppercase; border: 1px solid var(--border-3); border-radius: 999px;
-  padding: 2px 8px; align-self: flex-start; color: var(--text-4); white-space: nowrap; }
-.pill-status.is-live { color: var(--accent); border-color: var(--accent); }
-.pill-status.is-beta { color: var(--amber); border-color: var(--amber); }
-.pill-status.is-soon { border-style: dashed; }
-
 .pill-future { font-family: var(--font-mono); font-size: 13px; border: 1px dashed var(--border-3); border-radius: 6px; padding: 8px 12px; text-align: center; }
 .checks-note { margin-top: 24px; font-size: 14px; line-height: 1.6; color: var(--text-4); }
 .checks-note .tag { font-family: var(--font-mono); color: var(--amber); }
@@ -371,17 +361,17 @@ section.block { padding-top: var(--section-gap); }
     <a class="brand" href="/" aria-label="Sierrafy home">
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" style="color: var(--accent)" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="22" height="16" rx="3"/><rect x="7" y="11" width="5" height="5" rx="1"/><path d="M15 12h6M15 16h4"/></svg>
       <span class="brand-name">sierrafy</span>
-      <span class="badge">v0.1.0 · phase 1</span>
+      <span class="badge">v0 · phase 1</span>
     </a>
     <nav class="nav-links" aria-label="Primary">
       <a href="#checks">How it works</a>
-      <a href="https://docs.sierrafy.dev/">Docs</a>
-      <a href="https://github.com/SUBiango/sierrafy/blob/main/docs/architecture/Sierrafy_Architecture_v1.1.md">Spec</a>
+      <a href="#quickstart">Docs</a>
+      <a href="#">Spec</a> <!-- TODO: link to architecture spec -->
       <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Switch to light theme">
         <svg class="i-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
         <svg class="i-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
       </button>
-      <a class="btn-gh" href="https://github.com/SUBiango/sierrafy">
+      <a class="btn-gh" href="#"> <!-- TODO: GitHub repo URL -->
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 19c-4 1.5-4-2-6-2.5M15 21v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.3 4.3 0 0 0-.1-3.2s-1-.3-3.4 1.3a11.6 11.6 0 0 0-6 0C6.8 2.8 5.8 3.1 5.8 3.1a4.3 4.3 0 0 0-.1 3.2A4.6 4.6 0 0 0 4.4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
         GitHub
       </a>
@@ -397,7 +387,7 @@ section.block { padding-top: var(--section-gap); }
     <div class="hero-copy">
       <div class="hero-eyebrow eyebrow"><span class="dot"></span>Open source · MIT · built in Sierra Leone</div>
       <h1>Identity verification for Sierra Leone, built in the open.</h1>
-      <p class="hero-sub">An SDK for checking Sierra Leonean eID cards and passports. NIN validation and document OCR work today; face matching, fraud signals and NFC chip reading are next. Self-hosted and works offline.</p>
+      <p class="hero-sub">An SDK for checking Sierra Leonean eID cards and passports: NIN validation, document OCR, face matching and NFC chip reading. Self-hosted, works offline, and there's no per-check fee.</p>
       <div class="install">
         <span class="prompt" aria-hidden="true">$</span>
         <code id="install-cmd">pnpm add @sierrafy/sdk</code>
@@ -406,8 +396,8 @@ section.block { padding-top: var(--section-gap); }
         </button>
       </div>
       <div class="hero-ctas">
-        <a class="btn btn-primary" href="https://docs.sierrafy.dev/">Read the docs</a>
-        <a class="btn btn-ghost" href="https://github.com/SUBiango/sierrafy/blob/main/docs/architecture/Sierrafy_Architecture_v1.1.md">Architecture spec →</a>
+        <a class="btn btn-primary" href="#quickstart">Read the docs</a>
+        <a class="btn btn-ghost" href="#">Architecture spec →</a> <!-- TODO: spec URL -->
       </div>
     </div>
 
@@ -499,31 +489,31 @@ KAMARA&lt;&lt;AMINATA&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</d
     <ol class="checks">
       <li class="check">
         <span class="check-n">01</span>
-        <div class="check-title"><strong>NIN format</strong><code>POST /v1/validate-nin</code><span class="pill-status is-live">in the SDK</span></div>
+        <div class="check-title"><strong>NIN format</strong><code>POST /v1/validate-nin</code></div>
         <p class="check-desc">The NIN is 8 uppercase letters and digits, with no typos, stray spaces or known test values. Runs instantly, before any upload.</p>
         <div class="check-meter"><div class="meter-label"><span>Confidence</span><span>Low</span></div><div class="meter" role="img" aria-label="Confidence: low"><span style="width:18%"></span></div></div>
       </li>
       <li class="check">
         <span class="check-n">02</span>
-        <div class="check-title"><strong>Document OCR</strong><code>POST /v1/ocr</code><span class="pill-status is-beta">experimental</span></div>
+        <div class="check-title"><strong>Document OCR</strong><code>POST /v1/ocr</code></div>
         <p class="check-desc">Reads the NIN, name and date of birth from the eID card or passport (including the MRZ) and checks them against what the user typed.</p>
         <div class="check-meter"><div class="meter-label"><span>Confidence</span><span>Medium</span></div><div class="meter" role="img" aria-label="Confidence: medium"><span style="width:42%"></span></div></div>
       </li>
       <li class="check">
         <span class="check-n">03</span>
-        <div class="check-title"><strong>Face match</strong><code>POST /v1/face-match</code><span class="pill-status is-soon">in development</span></div>
+        <div class="check-title"><strong>Face match</strong><code>POST /v1/face-match</code></div>
         <p class="check-desc">The person in the selfie is the person on the card. Nothing is stored.</p>
         <div class="check-meter"><div class="meter-label"><span>Confidence</span><span>Medium–high</span></div><div class="meter" role="img" aria-label="Confidence: medium to high"><span style="width:62%"></span></div></div>
       </li>
       <li class="check">
         <span class="check-n">04</span>
-        <div class="check-title"><strong>Fraud signals</strong><code>part of /v1/verify</code><span class="pill-status is-soon">in development</span></div>
+        <div class="check-title"><strong>Fraud signals</strong><code>part of /v1/verify</code></div>
         <p class="check-desc">Flags edited images, photos of screens, reused NINs, expired documents and altered fonts.</p>
         <div class="check-meter"><div class="meter-label"><span>Confidence</span><span>High</span></div><div class="meter" role="img" aria-label="Confidence: high"><span style="width:76%"></span></div></div>
       </li>
       <li class="check">
         <span class="check-n">05</span>
-        <div class="check-title"><strong>NFC chip read</strong><code>POST /v1/nfc-verify · mobile</code><span class="pill-status is-soon">in development</span></div>
+        <div class="check-title"><strong>NFC chip read</strong><code>POST /v1/nfc-verify · mobile</code></div>
         <p class="check-desc">Reads the data stored on the card's chip and checks it against the printed card. With NCRA's root certificate, it also confirms the chip data hasn't been altered.</p>
         <div class="check-meter"><div class="meter-label"><span>Confidence</span><span>Very high</span></div><div class="meter" role="img" aria-label="Confidence: very high"><span style="width:92%"></span></div></div>
       </li>
@@ -534,8 +524,7 @@ KAMARA&lt;&lt;AMINATA&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</d
         <span class="pill-future">not in phase 1</span>
       </li>
     </ol>
-    <p class="checks-note"><span class="tag">note</span> · The HTTP endpoints above arrive with the self-hosted gateway. Today checks 01 and 02 run as library calls, shown in the quickstart below.</p>
-    <p class="checks-note"><span class="tag">note</span> · Chip reading is not built yet. When it is, verifying the chip's signature will still need NCRA's CSCA certificate. Until that exists, <code>passive_auth_passed</code> returns <code>null</code>, not a pass.</p>
+    <p class="checks-note"><span class="tag">note</span> · Chip reading works now. Verifying the chip's signature needs NCRA's CSCA certificate. Until then, <code>passive_auth_passed</code> returns <code>null</code>, not a pass.</p>
   </div>
 </section>
 
@@ -545,53 +534,67 @@ KAMARA&lt;&lt;AMINATA&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</d
     <div class="quick-copy">
       <span class="eyebrow">// quickstart</span>
       <h2>One call. A result you can branch on.</h2>
-      <p>Install the SDK and validate a NIN offline, with no server and no account. The self-hosted gateway and the Python, PHP, React Native and Flutter SDKs follow in later milestones.</p>
+      <p>Run the gateway with <code class="inline-code">docker compose up</code>, then call it from JavaScript, Python or PHP. The React Native and Flutter SDKs add NFC chip reading.</p>
       <ul class="ticks">
-        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Runs offline, no server and no account</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Runs offline on your own server</li>
         <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Never stores selfies, card photos or face data</li>
-        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Format rules live in editable JSON, not in code</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>Consent logging built in</li>
       </ul>
     </div>
 
     <div class="code-card dark-island">
       <div class="tabs" role="tablist" aria-label="SDK language">
         <button class="tab" role="tab" id="tab-js" aria-controls="panel-js" aria-selected="true" data-file="verify.ts">JavaScript</button>
-        <button class="tab" role="tab" id="tab-py" aria-controls="panel-py" aria-selected="false" tabindex="-1" data-file="verify.py">Python <span class="tab-soon">M7</span></button>
-        <button class="tab" role="tab" id="tab-php" aria-controls="panel-php" aria-selected="false" tabindex="-1" data-file="verify.php">PHP <span class="tab-soon">M8</span></button>
+        <button class="tab" role="tab" id="tab-py" aria-controls="panel-py" aria-selected="false" tabindex="-1" data-file="verify.py">Python</button>
+        <button class="tab" role="tab" id="tab-php" aria-controls="panel-php" aria-selected="false" tabindex="-1" data-file="verify.php">PHP</button>
         <span class="filename" id="filename">verify.ts</span>
       </div>
-<pre class="code-panel" role="tabpanel" id="panel-js" aria-labelledby="tab-js" tabindex="0"><code>import { validateNin } from '@sierrafy/sdk/nin';
+<pre class="code-panel" role="tabpanel" id="panel-js" aria-labelledby="tab-js" tabindex="0"><code>import { Sierrafy } from '@sierrafy/sdk';
 
-const result = validateNin(form.nin);
+const sfy = new Sierrafy({
+  apiKey:  process.env.SIERRAFY_KEY,
+  baseUrl: 'https://verify.your-app.sl'
+});
 
-// {
-//   valid: true,
-//   nin: 'K7M2QX4P',
-//   checks: { length: true, charset: true,
-//             checksum: true, blacklist: true }
-// }
+const result = await sfy.verify({
+  nin:     'K7M2QX4P',
+  idImage: cardPhoto,
+  selfie:  selfiePhoto,
+  options: { faceMatch: true, fraudCheck: true }
+});
 
-if (!result.valid) {
-  // INVALID_LENGTH | INVALID_CHARSET | BLACKLISTED
-  return reject(result.error);
-}
+if (result.status === 'PASS') onboard(user);</code></pre>
+<pre class="code-panel" role="tabpanel" id="panel-py" aria-labelledby="tab-py" tabindex="0" hidden><code>from sierrafy import Sierrafy
 
-// Structural only. This does not mean the NIN
-// is registered with NCRA.
-onboard(user);</code></pre>
-<pre class="code-panel" role="tabpanel" id="panel-py" aria-labelledby="tab-py" tabindex="0" hidden><code># The Python SDK is not built yet. It wraps the
-# self-hosted gateway, and both land in M7.
-#
-# Today the validator runs in JavaScript, or
-# behind your own service. Follow progress at
-# github.com/SUBiango/sierrafy</code></pre>
-<pre class="code-panel" role="tabpanel" id="panel-php" aria-labelledby="tab-php" tabindex="0" hidden><code>// The PHP SDK is not built yet. It wraps the
-// self-hosted gateway, and both land in M8.
-//
-// Today the validator runs in JavaScript, or
-// behind your own service. Follow progress at
-// github.com/SUBiango/sierrafy</code></pre>
-      <div class="code-foot"><span>Thresholds below apply to the full <code>/v1/verify</code> flow, once the gateway ships.</span>
+sfy = Sierrafy(
+    api_key  = os.environ['SIERRAFY_KEY'],
+    base_url = 'https://verify.your-app.sl'
+)
+
+result = sfy.verify(
+    nin      = 'K7M2QX4P',
+    id_image = card_bytes,
+    selfie   = selfie_bytes,
+    options  = {'face_match': True}
+)
+
+if result['status'] == 'PASS':
+    onboard(user)</code></pre>
+<pre class="code-panel" role="tabpanel" id="panel-php" aria-labelledby="tab-php" tabindex="0" hidden><code>use Sierrafy\Client;
+
+$sfy = new Client([
+    'api_key'  =&gt; getenv('SIERRAFY_KEY'),
+    'base_url' =&gt; 'https://verify.your-app.sl'
+]);
+
+$result = $sfy-&gt;verify([
+    'nin'      =&gt; 'K7M2QX4P',
+    'id_image' =&gt; base64_encode($card),
+    'selfie'   =&gt; base64_encode($selfie),
+]);
+
+if ($result['status'] === 'PASS') onboard($user);</code></pre>
+      <div class="code-foot">
         <span>→ <span class="s-pass">PASS</span> · proceed</span>
         <span>→ <span class="s-review">REVIEW</span> · manual check</span>
         <span>→ <span class="s-fail">FAIL</span> · reject</span>
@@ -608,13 +611,13 @@ onboard(user);</code></pre>
     <div class="footer-brand">
       <span class="brand-name">sierrafy</span>
       <span>MIT licensed · sierrafy.dev</span>
-      <span>Maintained in Sierra Leone. <a href="https://github.com/SUBiango/sierrafy/blob/main/CONTRIBUTING.md">Contributions welcome</a>.</span>
+      <span>Maintained in Sierra Leone. <a href="#">Contributions welcome</a>.</span> <!-- TODO: CONTRIBUTING.md URL -->
     </div>
     <nav class="footer-links" aria-label="Footer">
-      <a href="https://docs.sierrafy.dev/">Docs</a>
-      <a href="https://github.com/SUBiango/sierrafy/blob/main/docs/architecture/Sierrafy_Architecture_v1.1.md">Architecture spec</a>
-      <a href="https://github.com/SUBiango/sierrafy">GitHub</a>
-      <a href="https://github.com/SUBiango/sierrafy/blob/main/CONTRIBUTING.md">Contributing</a>
+      <a href="#quickstart">Docs</a>
+      <a href="#">Architecture spec</a> <!-- TODO -->
+      <a href="#">GitHub</a> <!-- TODO -->
+      <a href="#">Contributing</a> <!-- TODO -->
     </nav>
     <p class="footer-legal">Sierrafy is an independent open-source project, not an NCRA product. Card graphics on this site are illustrative specimens.</p>
   </div>
