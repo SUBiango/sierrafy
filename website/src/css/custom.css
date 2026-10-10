@@ -1,0 +1,47 @@
+/**
+ * Docs theme, matched to the landing page so the two read as one site.
+ * Tokens mirror site/index.html; see docs/mockup/HANDOFF.md for the source.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --ifm-color-primary: #0f7743;
+  --ifm-color-primary-dark: #0d6b3c;
+  --ifm-color-primary-darker: #0c6438;
+  --ifm-color-primary-darkest: #0a522e;
+  --ifm-color-primary-light: #11834a;
+  --ifm-color-primary-lighter: #128a4e;
+  --ifm-color-primary-lightest: #149c58;
+
+  --ifm-font-family-base: 'IBM Plex Sans', system-ui, sans-serif;
+  --ifm-heading-font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  --ifm-font-family-monospace: 'JetBrains Mono', ui-monospace, monospace;
+
+  --ifm-background-color: #f5f8f6;
+  --ifm-code-font-size: 93%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #3dd68c;
+  --ifm-color-primary-dark: #26d07e;
+  --ifm-color-primary-darker: #23c476;
+  --ifm-color-primary-darkest: #1ca161;
+  --ifm-color-primary-light: #54dc9a;
+  --ifm-color-primary-lighter: #60dfa2;
+  --ifm-color-primary-lightest: #84e7b8;
+
+  --ifm-background-color: #0c110e;
+  --ifm-background-surface-color: #0f1612;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+.navbar__title {
+  font-family: var(--ifm-font-family-monospace);
+  letter-spacing: -0.02em;
+}
+
+/* Used on pages documenting something that is not finished. */
+.admonition-experimental {
+  border-left-color: #e8b04b;
+}

@@ -50,10 +50,31 @@ pnpm run check:pii     # the sample-data guard described below
 CI runs lint, the PII guard, the build, and the coverage test. Run those locally
 before opening a pull request and there should be no surprises.
 
-The landing page has no build step. Open `site/index.html` directly, or use the
-VS Code Live Server extension, which is preconfigured on port 5501 with `site/`
-as its root, so it serves what Netlify serves. The email capture form only
-records addresses once deployed to Netlify, not under Live Server.
+### Running the site locally
+
+There are two sites, deployed separately.
+
+**The landing page** (`sierrafy.dev`) is a single self-contained file with no
+build step:
+
+```sh
+pnpm run site:dev     # serves site/ at localhost:4000
+```
+
+Opening `site/index.html` directly works too, as does the VS Code Live Server
+extension, which is preconfigured on port 5501 with `site/` as its root.
+
+**The documentation** (`docs.sierrafy.dev`) is a Docusaurus site in `website/`:
+
+```sh
+pnpm run docs:dev     # dev server with hot reload, at localhost:3000
+pnpm run docs:build   # production build into website/build (gitignored)
+pnpm run docs:serve   # preview that build, at localhost:3000
+```
+
+The two do not serve each other. `docs:dev` only knows about the docs and
+redirects unknown paths to the docs home, so use `site:dev` for the landing
+page. Links between them are absolute URLs for the same reason.
 
 ## Project conventions
 
