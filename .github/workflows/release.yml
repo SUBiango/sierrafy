@@ -31,11 +31,14 @@ jobs:
       # clears neither. Node 24 ships 11.19.1. Lowering this breaks trusted
       # publishing with an authentication error rather than a version error.
       # CI still tests on 22, and this job re-runs the whole suite on 24.
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      # No registry-url on purpose. It makes setup-node write an .npmrc carrying
+      # //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}, which is pointless
+      # under trusted publishing and can shadow the OIDC credential when the
+      # variable is unset. npmjs.org is the default registry anyway.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: pnpm
-          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -127,28 +130,28 @@ jobs:
       # Staged publishing, not a direct publish. CI submits the tarball to a
       # queue; a maintainer approves it with 2FA before it becomes installable.
       #
-      # Two reasons this is the publish step rather than `npm publish`:
-      # `npm stage publish` needs no 2FA, so NPM_TOKEN does not need the Bypass
-      # 2FA setting that npm is deprecating for direct publishing in Jan 2027;
-      # and a human with a 2FA device now sits between a compromised pipeline and
-      # the registry, which is the gap provenance alone leaves open
+      # That puts a human with a 2FA device between a compromised pipeline and
+      # the registry, which is the gap provenance alone leaves open: provenance
+      # attests where a build came from, not that it was clean
       # (docs/development/supply-chain.md).
       #
-      # For a package that does not exist yet, npm writes a 0.0.0-stage
-      # placeholder and holds the real version until approval.
+      # The trusted publisher for this package is configured stage-only, so even
+      # a fully compromised run cannot publish directly, only queue something a
+      # human can reject.
+      # No token. The package has a trusted publisher for this repository and
+      # workflow, so npm authenticates the stage with the OIDC credential minted
+      # from `id-token: write`. Provenance is generated automatically for a
+      # public package from a public repository, so NPM_CONFIG_PROVENANCE is
+      # redundant too.
       - name: Stage the release on npm
         working-directory: packages/core
         run: npm stage publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: 'true'
 
-      - name: Show what is awaiting approval
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Say what to do next
         run: |
-          npm stage list @sierrafy/sdk || true
-          echo "::notice::Staged. Approve with: npm stage approve <stage-id>"
+          echo "::notice::Staged for approval. Run 'npm stage list @sierrafy/sdk',"\
+               "inspect with 'npm stage view <id>', then 'npm stage approve <id>'."\
+               "The draft GitHub Release stays a draft until you do."
 
       # Draft, because the version is staged rather than published. Publish the
       # release after approving the stage, so GitHub and npm agree.
