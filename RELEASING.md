@@ -93,12 +93,30 @@ git push origin v0.1.0
 ```
 
 The tag triggers `.github/workflows/release.yml`, which re-runs every gate,
-verifies the tag matches the version in `packages/core/package.json`, publishes
-to npm with provenance, and opens a GitHub Release.
+verifies the tag matches the version in `packages/core/package.json`, checks the
+tarball, installs it as a consumer would, and then **stages** the release on npm.
 
-**6. Merge `main` back into `develop`** so the version bump is not stranded.
+**6. Approve the staged release.** The tag does not publish. CI puts the version
+in npm's staging queue and a maintainer releases it with a 2FA challenge:
 
-## Publishing is CI-only, on purpose
+```sh
+npm stage list @sierrafy/sdk
+npm stage view <stage-id>      # or `npm stage download <stage-id>` to inspect it
+npm stage approve <stage-id>   # prompts for 2FA
+```
+
+Then publish the draft GitHub Release the workflow created, so GitHub and npm
+agree. Nothing is installable before this step: for a package that did not exist,
+npm shows only a `0.0.0-stage` placeholder.
+
+This is deliberate. See
+[docs/development/supply-chain.md](docs/development/supply-chain.md): provenance
+attests where a build came from, not that it was clean, so a person with a 2FA
+device is the last gate a compromised pipeline cannot pass.
+
+**7. Merge `main` back into `develop`** so the version bump is not stranded.
+
+## Publishing is CI-staged, approved by hand
 
 `packages/core/package.json` sets `publishConfig.provenance`, so a publish from a
 laptop fails. Provenance requires the OIDC token that only a GitHub Actions run
