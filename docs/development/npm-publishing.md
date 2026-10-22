@@ -28,20 +28,32 @@ After that, a token can stage a release but not publish one. Trusted publishing
 stops being the better option and becomes the only one, so treat the token below
 as a bootstrap step with a shelf life, not a working arrangement.
 
-## The bootstrap problem
+## How this project publishes
 
-npm will not let you configure a trusted publisher for a package that does not
-exist, and the package only comes into existence when something publishes it. So
-the first publish needs a token even though every publish after it does not.
+**Through the staging queue, not directly.** CI runs `npm stage publish`, which
+uploads the tarball to a queue instead of the registry. Nothing is installable
+until a maintainer approves it with a 2FA challenge.
+
+That choice does three things at once:
+
+- **No bypass-2FA token is needed.** `npm stage publish` does not require 2FA, so
+  the token can keep npm's default. Direct `npm publish` from CI needs a token
+  with *Bypass two-factor authentication* enabled, which is the credential class
+  npm is restricting and removing from direct publishing in January 2027.
+- **It solves the bootstrap problem.** npm will not configure a trusted publisher
+  for a package that does not exist, and until 2 October 2026 nothing but a direct
+  publish could create one. `npm stage publish` can now create a new package: npm
+  writes a `0.0.0-stage` placeholder and holds the real version in the queue until
+  approval.
+- **It puts a person between a compromised pipeline and the registry.**
+  [supply-chain.md](supply-chain.md) argues provenance attests *where* an artifact
+  was built, not that the build was clean. A human approving with a 2FA device is
+  the part provenance cannot supply.
 
 ```
-claim the scope  ->  bootstrap publish with a short-lived token
-                 ->  configure trusted publishing  ->  revoke the token
-                 ->  (optional) move to staged publishing
+claim the scope  ->  tag  ->  CI stages the release
+                 ->  approve with 2FA  ->  configure trusted publishing
 ```
-
-This is a known gap, not something peculiar to this project. crates.io has the
-same one.
 
 ## Phase 0: account setup
 
@@ -88,26 +100,25 @@ On npmjs.com: Access Tokens, Generate New Token. Granular is the only type now.
 |---|---|---|
 | Expiration | 7 days | You need it once. 90 days is the cap; use far less. |
 | Packages and scopes | `@sierrafy/*` | A token may cover up to 50 packages or scopes |
-| Permission | **Read and write (publish and stage)** | See the warning below |
+| Permission | **Read and write (stage only)**, or publish and stage | Staging is all the workflow does |
 | Organizations | No access | The token must not manage the org |
-| Bypass 2FA | **Enabled** | Required, see below |
+| Bypass 2FA | **Leave off** | Staging does not need it, see below |
 | IP allowlist | Leave empty | GitHub runner IPs are not predictable |
 
-Two of those will bite you if you get them wrong:
-
-> **Pick "publish and stage", not "stage only".** npm added a stage-only
-> permission on 18 September 2026. A stage-only token refuses `npm publish`
-> outright, even with 2FA bypass enabled, so the bootstrap publish would fail.
-> Stage-only is a good choice later, once the package exists; it is the wrong
-> one now.
-
-> **Bypass 2FA must be on.** Write tokens enforce 2FA by default as of 5 November
-> 2025. Without the bypass, the publish stalls on a prompt no CI run can answer.
+> **Leave Bypass 2FA off.** This is the opposite of what a direct-publish
+> workflow needs, and it is deliberate. `npm stage publish` requires no 2FA, so
+> the token works with npm's default. A bypass-2FA token would also be barred
+> from changing trusted-publishing settings (since 31 July 2026) and loses direct
+> publishing entirely in January 2027.
 >
-> The bypass is deliberately narrow: since 31 July 2026 a bypass-2FA token cannot
-> perform account-identity actions, change package access, add maintainers, or
-> change trusted-publishing settings. That last one matters for Phase 2, which has
-> to be done in the web UI rather than from CI.
+> If you try a direct `npm publish` from CI with a non-bypass token, it fails
+> with `npm error code EOTP` after building and signing provenance. That is the
+> token setting, not a packaging fault.
+
+> **Stage-only is the safer permission**, now that the workflow only stages. It
+> means a stolen token cannot publish at all, only queue something for a human to
+> reject. Choose "publish and stage" only if you also want the option of
+> publishing directly.
 
 Copy the token. npm shows it once.
 
@@ -139,6 +150,19 @@ The tag triggers `release.yml`. Watch it:
 ```sh
 gh run watch "$(gh run list --workflow=release.yml --limit 1 --json databaseId -q '.[0].databaseId')"
 ```
+
+The workflow **stages** the release; it does not publish it. Approve it yourself:
+
+```sh
+npm stage list @sierrafy/sdk     # find the stage id
+npm stage view <stage-id>        # inspect what would go out
+npm stage download <stage-id>    # or pull the tarball and look properly
+npm stage approve <stage-id>     # prompts for 2FA, then it is live
+```
+
+Then publish the draft GitHub Release the workflow created, so GitHub and npm
+agree. Until approval, npm shows only a `0.0.0-stage` placeholder for a package
+that did not exist before.
 
 ### Verify the published package
 
@@ -233,9 +257,9 @@ Once a trusted-publishing release has succeeded, delete the `NPM_TOKEN` secret
 from the repository and revoke the token on npm. Leaving it is the whole risk you
 just removed, still sitting there.
 
-## Phase 3: staged publishing, worth doing here
+## Staged publishing, in more detail
 
-Optional, and recommended for this project specifically.
+This is what `release.yml` already does, described in full.
 
 Staged publishing, generally available since May 2026, splits publishing in two.
 CI runs `npm stage publish`, which uploads the tarball to a queue instead of the
@@ -258,12 +282,13 @@ compromised pipeline and the registry, which is the gap provenance alone leaves
 open. For a package whose whole job is deciding whether to accept an identity
 document, that is worth one manual step per release.
 
-Pairing it with a stage-only trusted publisher means the pipeline has no way to
-publish directly even if it is fully compromised.
+Pairing it with a stage-only token, and later a stage-only trusted publisher,
+means the pipeline has no way to publish directly even if it is fully
+compromised.
 
-Needs npm CLI 11.15.0 or later, so Node 24 covers it. Changing the workflow is a
-one-line edit from `npm publish` to `npm stage publish`, plus a note in
-RELEASING.md that a release is not done until it is approved.
+Needs npm CLI 11.15.0 or later. `release.yml` checks that explicitly before
+staging, because the failure mode for an old npm is "stage is not a command",
+which reads like a typo rather than a version problem.
 
 ## Requirements
 
@@ -287,6 +312,7 @@ npm 10.9.9, which is too old for either feature. Use Node 24.
 | 31 Jul 2026 | Bypass-2FA tokens barred from account-identity actions and trusted-publishing changes |
 | 3 Sep 2026 | New trusted publisher configs default to allowing `npm stage publish`; direct publish opt-in |
 | 18 Sep 2026 | "Read and write (stage only)" token permission added |
+| 2 Oct 2026 | `npm stage publish` can create a package that does not exist yet |
 | **Jan 2027** | **Direct publishing with a granular token removed** |
 
 That last row is the deadline that matters. If the move to trusted publishing
@@ -297,7 +323,9 @@ to be staged and approved by hand instead.
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Publish hangs or fails asking for an OTP | Write token without Bypass 2FA | Recreate the token with the bypass enabled |
+| `npm error code EOTP`, after provenance is signed | Direct `npm publish` with a non-bypass token | Stage instead (`npm stage publish`), which needs no 2FA |
+| `npm stage` is not a command | npm older than 11.15.0 | Node 24 in the release job; the workflow checks this |
+| Staged but never goes live | Nobody approved it | `npm stage list`, then `npm stage approve <id>` |
 | `403` on `npm publish` with a valid token | Token is "stage only" | Use "publish and stage", or run `npm stage publish` |
 | `403` under OIDC, token removed | Trusted publisher mismatch, or direct publish not in allowed actions | Org, repository and workflow filename must match exactly; check allowed actions |
 | OIDC ignored, npm asks for auth | npm CLI older than 11.5.1 | Node 24 in the release job |
