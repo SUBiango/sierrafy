@@ -111,20 +111,60 @@ jobs:
               });
           "
 
-      - name: Publish to npm
-        run: pnpm publish --filter @sierrafy/sdk --access public --no-git-checks
+      # Node version does not guarantee npm version, and the failure mode for a
+      # too-old npm is "stage is not a command", which reads like a typo. Fail
+      # with the real reason instead.
+      - name: Check npm supports staged publishing
+        run: |
+          NPM_V="$(npm --version)"
+          REQ=11.15.0
+          echo "npm $NPM_V on node $(node --version)"
+          if [ "$(printf '%s\n%s\n' "$REQ" "$NPM_V" | sort -V | head -1)" != "$REQ" ]; then
+            echo "::error::npm $NPM_V is older than $REQ, which 'npm stage' requires. Check node-version."
+            exit 1
+          fi
+
+      # Staged publishing, not a direct publish. CI submits the tarball to a
+      # queue; a maintainer approves it with 2FA before it becomes installable.
+      #
+      # Two reasons this is the publish step rather than `npm publish`:
+      # `npm stage publish` needs no 2FA, so NPM_TOKEN does not need the Bypass
+      # 2FA setting that npm is deprecating for direct publishing in Jan 2027;
+      # and a human with a 2FA device now sits between a compromised pipeline and
+      # the registry, which is the gap provenance alone leaves open
+      # (docs/development/supply-chain.md).
+      #
+      # For a package that does not exist yet, npm writes a 0.0.0-stage
+      # placeholder and holds the real version until approval.
+      - name: Stage the release on npm
+        working-directory: packages/core
+        run: npm stage publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: 'true'
 
-      - name: Create the GitHub Release
+      - name: Show what is awaiting approval
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm stage list @sierrafy/sdk || true
+          echo "::notice::Staged. Approve with: npm stage approve <stage-id>"
+
+      # Draft, because the version is staged rather than published. Publish the
+      # release after approving the stage, so GitHub and npm agree.
+      - name: Create a draft GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
+            --draft \
             --title "$GITHUB_REF_NAME" \
             --notes "See [CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/main/CHANGELOG.md) for what changed.
 
           \`\`\`sh
           npm install @sierrafy/sdk
-          \`\`\`"
+          \`\`\`
+
+          _This release is a draft because the npm version is staged awaiting
+          approval. Run \`npm stage approve <stage-id>\` and then publish this
+          release._"
