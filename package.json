@@ -9,7 +9,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc -b && pnpm --filter @sierrafy/sdk run copy-assets",
     "docs:dev": "pnpm --filter @sierrafy/website start",
     "docs:build": "pnpm --filter @sierrafy/website build",
     "docs:serve": "pnpm --filter @sierrafy/website serve",
