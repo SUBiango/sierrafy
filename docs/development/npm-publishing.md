@@ -257,6 +257,15 @@ Once a trusted-publishing release has succeeded, delete the `NPM_TOKEN` secret
 from the repository and revoke the token on npm. Leaving it is the whole risk you
 just removed, still sitting there.
 
+Order matters: take the token out of the workflow first, confirm a release still
+stages on OIDC alone, and only then delete the secret and revoke it. A granular
+token cannot be edited after creation, so if OIDC turns out to be misconfigured
+you would otherwise have to create a new token to get unstuck.
+
+**Current state, as of v0.1.0:** `release.yml` carries no token. The package has a
+stage-only trusted publisher for `SUBiango/sierrafy` and `release.yml`, and
+provenance is generated automatically.
+
 ## Staged publishing, in more detail
 
 This is what `release.yml` already does, described in full.

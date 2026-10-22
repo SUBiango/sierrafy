@@ -63,9 +63,10 @@ have stopped CVE-2025-30066 outright, and it costs one line of churn per bump:
 - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 ```
 
-Pin `release.yml` first. It is the job holding the publishing credential. `ci.yml`
-matters less: it has no secrets and `contents: read`, so a compromised action
-there can waste a build but cannot publish anything.
+Pin `release.yml` first. It is the job that publishes. `ci.yml` matters less: it
+has no secrets and `contents: read`, so a compromised action there can waste a
+build but cannot publish anything. Dependabot pins both in practice, which is
+fine: it groups bumps into one weekly PR, so the extra churn is negligible.
 
 Keep the SHAs current with Dependabot, which understands the `# vX.Y.Z` comment
 convention and raises a PR that updates both:
@@ -80,12 +81,15 @@ updates:
       interval: weekly
 ```
 
-**2. Remove the npm token entirely.** Trusted publishing (OIDC) means there is no
-stored credential to steal: npm accepts a publish because GitHub proved which
-workflow is running. This is strictly better than pinning, because it removes the
-asset rather than narrowing the path to it. See
-[npm-publishing.md](npm-publishing.md), which covers the catch: the first publish
-of a new package cannot use OIDC, so it needs a token once.
+**2. Remove the npm token entirely.** Done as of v0.1.0. Trusted publishing
+(OIDC) means there is no stored credential to steal: npm accepts the stage
+because GitHub proved which workflow is running. This is strictly better than
+pinning, because it removes the asset rather than narrowing the path to it.
+
+The trusted publisher is configured **stage-only**, so even a fully compromised
+run cannot publish directly. It can only queue a version for a human to inspect
+and reject, which is the point of
+[staged publishing](npm-publishing.md#staged-publishing-in-more-detail).
 
 **3. Split the release job in two.** Run every gate (lint, PII guard, build,
 tests, tarball checks) in a job with no elevated permissions, and give the
