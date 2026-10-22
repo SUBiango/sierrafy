@@ -39,5 +39,9 @@ eID samples/
 samples/
 *.eid-sample.*
 
+# Docusaurus build output and cache. Generated, never committed.
+website/build/
+website/.docusaurus/
+
 # Netlify
 .netlify/

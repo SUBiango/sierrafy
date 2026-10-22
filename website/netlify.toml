@@ -1,0 +1,37 @@
+# Netlify configuration for docs.sierrafy.dev.
+#
+# This is a second Netlify site on the same repository. In its site settings,
+# leave the **base directory at the repository root** and set the **package
+# directory** to `website`. Netlify looks for netlify.toml in the package
+# directory before the base directory, so that is what makes this file the one it
+# reads rather than the root netlify.toml that publishes the landing page.
+#
+# Paths below are relative to the BASE directory, not to this file, which is why
+# `publish` says `website/build`. Base stays at the root so pnpm finds the
+# workspace lockfile; Netlify detects the package manager from the base
+# directory, and `website/` has no lockfile of its own.
+#
+# Keeping the docs separate from sierrafy.dev means the landing page deploys with
+# no build step, and a failing docs build cannot block it.
+
+[build]
+  publish = "website/build"
+  command = "pnpm install --frozen-lockfile && pnpm --filter @sierrafy/website build"
+
+[build.environment]
+  # Docusaurus 3 needs 18+; 22 matches the rest of CI.
+  NODE_VERSION = "22"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+
+# Docusaurus fingerprints its assets, so they are safe to cache hard.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

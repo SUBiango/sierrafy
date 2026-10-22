@@ -50,10 +50,31 @@ pnpm run check:pii     # the sample-data guard described below
 CI runs lint, the PII guard, the build, and the coverage test. Run those locally
 before opening a pull request and there should be no surprises.
 
-The landing page has no build step. Open `site/index.html` directly, or use the
-VS Code Live Server extension, which is preconfigured on port 5501 with `site/`
-as its root, so it serves what Netlify serves. The email capture form only
-records addresses once deployed to Netlify, not under Live Server.
+### Running the site locally
+
+There are two sites, deployed separately.
+
+**The landing page** (`sierrafy.dev`) is a single self-contained file with no
+build step:
+
+```sh
+pnpm run site:dev     # serves site/ at localhost:4000
+```
+
+Opening `site/index.html` directly works too, as does the VS Code Live Server
+extension, which is preconfigured on port 5501 with `site/` as its root.
+
+**The documentation** (`docs.sierrafy.dev`) is a Docusaurus site in `website/`:
+
+```sh
+pnpm run docs:dev     # dev server with hot reload, at localhost:3000
+pnpm run docs:build   # production build into website/build (gitignored)
+pnpm run docs:serve   # preview that build, at localhost:3000
+```
+
+The two do not serve each other. `docs:dev` only knows about the docs and
+redirects unknown paths to the docs home, so use `site:dev` for the landing
+page. Links between them are absolute URLs for the same reason.
 
 ## Project conventions
 
@@ -105,23 +126,44 @@ it configurable rather than hard-coded.
 ### Landing page
 
 `site/index.html` is self-contained, with all CSS and JS inline and no
-dependencies. Netlify publishes `site/` alone, so anything the page needs must
-live in that directory.
+dependencies beyond Google Fonts. Netlify publishes `site/` alone, so anything
+the page needs must live in that directory. `docs/mockup/` is the design
+source and carries the full handoff document, but it is a visual reference only:
+it describes the finished Phase 1 system, so `site/index.html` is authoritative
+for copy and deliberately differs where the mockup claims something that is not
+built.
 
-- **Theming is driven by CSS custom properties.** Colours are defined under both
-  the `[data-theme="dark"]` and `[data-theme="light"]` blocks. Add a new colour as
-  a variable in *both* themes rather than hard-coding it. The theme is toggled by
-  the `data-theme` attribute on `<html>` and persisted to `localStorage` under the
-  key `sfy-theme`.
-- **Keep the font split.** IBM Plex Mono (`--mono`) is for technical and label
-  text, the code-like chrome of the page. Inter (`--sans`) is for prose.
-- **The email capture is a Netlify Form** (`name="notify"`, `data-netlify="true"`,
-  a hidden `form-name` field, and a `bot-field` honeypot). It submits by `fetch`
-  to `/`, the Netlify AJAX pattern, and shows a toast.
-- **The verification layers grid shows four cards, not five.** NFC is folded into
-  card 02, "Document OCR & NFC chip", so the grid does not leave an orphaned fifth
-  item wrapping. The architecture spec still describes these as five distinct
-  layers, which is correct; the grid is a layout decision.
+- **Theming is driven by CSS custom properties.** Every colour is defined once
+  under `:root` and redefined under `[data-theme="light"]`. Add a new colour as a
+  token in *both* themes rather than hard-coding a hex value, or it will not
+  follow the theme. The theme is set by the `data-theme` attribute on `<html>`,
+  persisted to `localStorage` under `sfy-theme`, and applied by an inline script
+  in `<head>` before first paint so there is no flash.
+- **Two things deliberately do not theme.** Code surfaces (the JSON response
+  panel and the code card) carry `.dark-island`, which redeclares the dark tokens
+  locally so code always renders on dark. The sample ID card uses fixed
+  `--card-*` tokens so it looks identical in both themes.
+- **Three fonts, by role.** Bricolage Grotesque (`--font-display`) for headings,
+  IBM Plex Sans (`--font-body`) for prose, JetBrains Mono (`--font-mono`) for
+  eyebrows, code, endpoints and JSON. All three are OFL licensed.
+- **The sample card is fictional and must stay that way.** The NIN is
+  `K7M2QX4P` and the person is "Aminata Kamara". It carries no coat of arms, no
+  "Republic of Sierra Leone" wording and no NCRA marks, its MRZ uses `SFY` rather
+  than a real country code, and it keeps the SPECIMEN watermark and the "NOT A
+  REAL DOCUMENT" label. Never substitute a real card, photo or NIN. Any new
+  identifier on the page also needs an entry in
+  `scripts/allowed-id-literals.txt`, or the PII guard fails the build.
+- **Every layer on the page carries a build status.** The page shows the whole
+  Phase 1 API, including endpoints that do not exist yet, so each row has a
+  `.pill-status` saying whether it is in the SDK, experimental, or in
+  development. When a milestone ships, move its pill. A page that presents
+  planned work as available is the specific failure this guards against.
+- **The hero animation** runs only while in view and while the tab is visible,
+  and renders a static finished state under `prefers-reduced-motion`.
+- **There is no email capture form.** The earlier holding page had a Netlify
+  form; the launch page replaced it with the install command. If a launch list is
+  wanted again, it needs the Netlify form attributes back
+  (`data-netlify`, a hidden `form-name`, a `bot-field` honeypot).
 
 ### Writing style
 

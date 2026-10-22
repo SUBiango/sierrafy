@@ -1,14 +1,12 @@
-# Netlify configuration for the Sierrafy landing page.
+# Netlify configuration for sierrafy.dev, the landing page.
 #
-# The landing page lives in `site/` and that directory alone is published, so a
-# deploy carries the site and nothing else. Publishing the repository root, which
-# is what this did before the SDK monorepo landed, also served `packages/`,
-# `specs/`, and `docs/` from the public domain. None of it is secret, since the
-# repository is public, but a deployed site should contain the site.
+# The page is a single self-contained file, so there is nothing to build and
+# nothing in the deploy path that could be compromised. The documentation is a
+# separate Netlify site at docs.sierrafy.dev, configured in website/netlify.toml,
+# so a docs build cannot affect this one.
 #
-# The page is a single self-contained file with no build step, so there is
-# nothing to compile. Netlify still parses the HTML in the publish directory at
-# deploy time to register the `notify` form, which keeps working from here.
+# `site/` alone is published. Publishing the repository root, which is what this
+# did before the SDK monorepo landed, also served packages/, specs/ and docs/.
 
 [build]
   publish = "site"

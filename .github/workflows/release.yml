@@ -18,17 +18,22 @@ jobs:
       contents: write # create the GitHub Release
       id-token: write # npm provenance (OIDC)
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # No `version` input on purpose. pnpm/action-setup@v6 errors out when the
       # workflow and package.json both name a version, and `packageManager` in
       # package.json is the better source: it pins an exact patch, so CI and a
       # contributor's machine run the same pnpm.
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
-      - uses: actions/setup-node@v7
+      # Node 24 (LTS), not 22, on purpose. Trusted publishing needs npm 11.5.1+
+      # and staged publishing needs 11.15.0+; Node 22 ships npm 10.9.9, which
+      # clears neither. Node 24 ships 11.19.1. Lowering this breaks trusted
+      # publishing with an authentication error rather than a version error.
+      # CI still tests on 22, and this job re-runs the whole suite on 24.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
 

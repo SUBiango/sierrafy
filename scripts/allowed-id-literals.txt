@@ -33,7 +33,15 @@ PQ4DIRIS   # the matching synthetic OCR misread
 # --- M2 OCR date-normaliser fixtures ---
 19920417   # synthetic DOB digits (1992-04-17), the spec's worked example
 
+# --- Landing page (site/index.html): the fictional sample card ---
+K7M2QX4P   # invented NIN on the sample card; the card is Sierrafy-branded,
+           # watermarked SPECIMEN and labelled NOT A REAL DOCUMENT
+
 # --- Not identifiers at all: structural tokens that match the same shape ---
+SCANNING   # status value in the hero's animated JSON response
+IDENTITY   # word in "SAMPLE IDENTITY CARD" on the sample card
+DOCUMENT   # word in "NOT A REAL DOCUMENT" on the sample card
+SPECIMEN   # the sample card's watermark
 YYYYMMDD   # date-format placeholder (Architecture Spec)
 JPEG2000   # image format name (Architecture Spec)
 RESOLVED   # status word in the M2 plan
