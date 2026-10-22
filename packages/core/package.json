@@ -50,9 +50,11 @@
     "provenance": true
   },
   "scripts": {
-    "build": "tsc -b && node scripts/copy-zone-maps.mjs",
+    "build": "tsc -b && pnpm run copy-assets",
+    "copy-assets": "node scripts/copy-zone-maps.mjs",
     "test": "jest",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "prepack": "node scripts/copy-zone-maps.mjs"
   },
   "dependencies": {
     "fastest-levenshtein": "^1.0.16"
