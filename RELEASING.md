@@ -125,6 +125,11 @@ The short version: the first publish of a new package cannot use OIDC, so it
 needs a short-lived token once, after which trusted publishing removes the stored
 credential entirely.
 
+Two things from that guide are worth knowing before you tag: a CI token must have
+*Bypass 2FA* enabled or the publish stalls on a prompt nothing can answer, and
+**direct publishing with a granular token is removed in January 2027**, so the
+move to trusted publishing is a deadline rather than a preference.
+
 Also **protect `main` and `develop`** as described above.
 
 ## If a release is wrong
