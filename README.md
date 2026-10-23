@@ -57,8 +57,7 @@ See the full spec:
 The NIN validator is the one piece you can use today.
 
 ```sh
-pnpm install
-pnpm run build
+npm install @sierrafy/sdk
 ```
 
 ```ts
@@ -70,7 +69,11 @@ validateNin('ABCD1234');
 ```
 
 See [`packages/core/README.md`](packages/core/README.md) for the OCR engine and
-for configuring the (still provisional) NIN format.
+for configuring the (still provisional) NIN format, or
+[docs.sierrafy.dev](https://docs.sierrafy.dev) for the full documentation.
+
+Working on Sierrafy itself rather than building with it? That setup is in
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Contributing
 
