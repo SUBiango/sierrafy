@@ -7,8 +7,13 @@ title: Install
 
 ```bash
 npm install @sierrafy/sdk
-# or: pnpm add @sierrafy/sdk
 ```
+
+| Package manager | Command |
+|---|---|
+| pnpm | `pnpm add @sierrafy/sdk` |
+| yarn | `yarn add @sierrafy/sdk` |
+| bun | `bun add @sierrafy/sdk` |
 
 Requires Node 20 or later.
 
@@ -40,6 +45,12 @@ native image-processing binary and a WebAssembly OCR bundle.
 ```bash
 npm install sharp tesseract.js
 ```
+
+| Package manager | Command |
+|---|---|
+| pnpm | `pnpm add sharp tesseract.js` |
+| yarn | `yarn add sharp tesseract.js` |
+| bun | `bun add sharp tesseract.js` |
 
 They load on the first `ocr()` call, not at import time, so importing the package
 root costs nothing until you actually run OCR. Calling `ocr()` without them

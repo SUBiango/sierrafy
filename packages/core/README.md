@@ -14,6 +14,8 @@ select it.
 npm install @sierrafy/sdk
 ```
 
+Or `pnpm add`, `yarn add`, `bun add`, whichever you use.
+
 The OCR engine needs `sharp` and `tesseract.js`. They are **optional peer
 dependencies**, so install them only if you use OCR:
 
