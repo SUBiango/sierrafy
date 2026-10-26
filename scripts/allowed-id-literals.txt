@@ -45,3 +45,4 @@ SPECIMEN   # the sample card's watermark
 YYYYMMDD   # date-format placeholder (Architecture Spec)
 JPEG2000   # image format name (Architecture Spec)
 RESOLVED   # status word in the M2 plan
+SECURITY   # the filename SECURITY.md, in prose and issue templates

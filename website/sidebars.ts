@@ -8,6 +8,7 @@ const sidebars: SidebarsConfig = {
     'configuring-the-format',
     'ocr',
     'scope',
+    'privacy',
     'versioning',
   ],
 };

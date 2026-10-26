@@ -14,6 +14,12 @@ about NCRA documents and regulations.
   Several details (NIN format, zone-map coordinates, CSCA certificate) are still
   unconfirmed. If you have authoritative information, that is a valuable
   contribution on its own.
+- Read the [Code of Conduct](CODE_OF_CONDUCT.md). It is the Contributor Covenant
+  2.1, and participating here means agreeing to it. One rule in it is specific to
+  this project and absolute: **never post a real identity document, or any value
+  read off one, anywhere in this repository.** See
+  [Real ID samples and PII](#real-id-samples-and-pii) for why, and
+  [`RESPONSIBLE_USE.md`](RESPONSIBLE_USE.md) for what happens if it occurs.
 
 ## What is in the repository
 
@@ -26,7 +32,10 @@ about NCRA documents and regulations.
 | `specs/` | One folder per feature, written just before that feature is built. |
 | `zone-maps/` | OCR zone maps (CC0, separate from the repository's MIT licence). |
 | `csca-certs/` | Where the NCRA CSCA root certificate will live once obtained. |
-| `site/` | The landing page. Netlify publishes this directory and nothing else. |
+| `site/` | The landing page (`sierrafy.dev`). Netlify publishes this directory and nothing else. |
+| `website/` | The Docusaurus documentation site (`docs.sierrafy.dev`). |
+| `scripts/` | The `check:pii` guard and the allowlist of synthetic identifiers. |
+| Root `*.md` policies | [`PRIVACY.md`](PRIVACY.md), [`SECURITY.md`](SECURITY.md), [`RESPONSIBLE_USE.md`](RESPONSIBLE_USE.md), and [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md). Public commitments, not internal notes: change them deliberately. |
 
 The architecture spec describes the *intended* Phase 1 system. Most of it is not
 built yet. Be precise about that distinction when writing docs or issues: do not
@@ -93,6 +102,21 @@ them.
   NCRA CSCA root certificate, which has not been obtained. Until it is, NFC reads
   return `passive_auth_passed: null` with a `CSCA_UNAVAILABLE` flag rather than
   failing the verification.
+- **Model weights must be licensed for commercial use, and the weights' licence
+  is the one that counts.** A permissive licence on an inference library says
+  nothing about the model files it downloads. The default `FACE_MODEL` is SFace
+  because OpenCV Zoo publishes its weights under Apache 2.0; InsightFace
+  `buffalo_l` licenses its weights for non-commercial research only and is
+  therefore never the default, however good it is. Adding a model means recording
+  the **weights'** licence in the table in spec §4.3.2. A mandatory dependency
+  that is more restrictive than MIT would also fail the DPG Standard's
+  platform-independence indicator.
+- **Identifiers are never stored under an unkeyed hash.** The NIN keyspace is
+  about 2.8 trillion values, so a plain SHA-256 digest of a NIN is reversible by
+  exhaustive search and is therefore the NIN. The duplicate-NIN check uses
+  HMAC-SHA-256 with a per-deployment `DUPLICATE_HASH_KEY` and refuses to run
+  unkeyed (spec §4.4.1). The digest is pseudonymised personal data, not anonymous
+  data, so it stays inside the 24-hour purge window and out of exports.
 - **Unconfirmed details stay configurable.** Section 12 of the architecture spec
   marks several assumptions as unconfirmed (the exact NIN format and checksum,
   zone-map coordinates, the CSCA certificate). Treat them as provisional: drive
@@ -186,10 +210,26 @@ consistently in the landing page, the README, the spec, and issue discussions.
 - **NCRA remains the authority. Sierrafy is the developer layer above it.** Phase
   1 is offline and structural. It cannot tell anyone that a NIN is registered or
   active, and no copy should imply otherwise.
-- Keep currency figures out of public-facing copy. The pricing context that
-  motivates the project belongs in the architecture spec (§2.1 and §12) only. The
-  older "USD 10,000 per month" framing has been removed everywhere and must not
-  be reintroduced.
+- **Keep currency figures out of every document, including the architecture
+  spec.** They used to be allowed in spec §2.1 and §12 as the context that
+  motivates the project. They are not any more: the spec is linked from
+  sierrafy.dev and goes to MoCTI, Christex, UNICEF, and DPG reviewers, and a
+  per-check price reads as an argument that NCRA is too expensive, which is the
+  opposite of the positioning above. The gap is *missing developer tooling*: no
+  sandbox, nothing self-hostable, no on-ramp for a two-person team. Both the
+  earlier "USD 10,000 per month" framing and the per-NIN price have been removed
+  everywhere and must not be reintroduced.
+- **The regulator is NatCA**, the National Communications Authority. It was
+  previously referred to as NATCOM, which is how it appears in older drafts and
+  in some external sources. Use NatCA, and keep NATCOM only where a sentence is
+  explaining the rename.
+- **There is no data protection law in force in Sierra Leone.** Cabinet approved
+  a National Data Protection Policy and the Data Protection and Right to Access
+  Information Act on 21 April 2026, and the bill was not yet enacted as of
+  October 2026. Write "designed for" or "designed to align with" that Act, never
+  "compliant with" it. The same caution applies to the MoCTI open-source software
+  policy: approved by the Ministry in 2025 and before Cabinet, so describe it as
+  policy in progress rather than settled law.
 
 ### Licensing
 

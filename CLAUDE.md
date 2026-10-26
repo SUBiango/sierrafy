@@ -20,7 +20,11 @@ because human contributors need them too. Follow them exactly. They cover:
 - **Writing style**, including no em dashes in user-facing documents.
 - **Messaging and positioning**: partner with NCRA, never compete. Frame the gap
   as missing developer tooling, not as NCRA being inadequate. No currency figures
-  in public copy.
+  anywhere, including the architecture spec. The regulator is NatCA, not NATCOM,
+  and no data protection law is in force yet, so write "designed for" the Act.
+- **Published policies**: `PRIVACY.md`, `SECURITY.md`, `RESPONSIBLE_USE.md`, and
+  `CODE_OF_CONDUCT.md` in the root are public commitments, mirrored in part at
+  docs.sierrafy.dev/privacy. Architecture spec §9.4 indexes them.
 - **Development setup**: pnpm, and the four commands CI runs.
 
 What follows is only the guidance specific to working here as an agent.
@@ -59,6 +63,13 @@ The other `packages/*` directories are scaffolds with placeholder exports.
   the NIN's decimal digits, so it rejects all-letter NINs, one of the two observed
   real shapes. It is a placeholder awaiting an NCRA-confirmed algorithm. A test
   pins this behaviour.
+- **Two spec decisions came out of the DPG Standard review (October 2026) and are
+  deliberate.** Do not revert them when M4 and M5 are built. The face model is
+  pluggable via `FACE_MODEL` with an Apache-2.0-weighted default (spec §4.3.2),
+  because InsightFace `buffalo_l`, which earlier drafts named, licenses its
+  *weights* for non-commercial research only. And the duplicate-NIN check is an
+  HMAC-SHA-256 keyed with a per-deployment secret (spec §4.4.1), because a plain
+  digest of an 8-character NIN is brute-forceable back to the NIN.
 - **Real ID samples never enter the repository, and neither do values read off
   them.** Two real NINs once reached a spec document as worked OCR examples; they
   were scrubbed and purged from git history on 2026-09-27. `pnpm run check:pii`
