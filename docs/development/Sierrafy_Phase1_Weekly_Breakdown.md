@@ -89,7 +89,7 @@ Tasks:
 **Goal:** Standalone FastAPI face-match service callable over localhost.
 
 Tasks:
-- Build `services/face-engine` (FastAPI + InsightFace buffalo_l).
+- Build `services/face-engine` (FastAPI + OpenCV DNN). The embedding model is selected by `FACE_MODEL`, defaulting to SFace, whose weights are Apache 2.0. Do **not** ship InsightFace `buffalo_l` as the default: its code is MIT but its weights are licensed for non-commercial research only (spec §4.3.2).
 - Implement face detection, embedding, cosine similarity.
 - Enforce threshold (default 0.82, env-configurable via `MATCH_THRESHOLD` at the face service; the gateway exposes the same knob as `FACE_THRESHOLD` per §7.2 — keep the two names mapped so the W17–18 `.env.example` is consistent). Return `FACE_UNREADABLE` on extraction failure.
 - Accept a reference photo from **either** the OCR-cropped card photo **or** an NFC DG2 image, so the NFC layer can later supply a higher-quality reference.
@@ -101,6 +101,8 @@ Tasks:
 - Service accepts a DG2-style reference image and returns a score (test with a sample chip photo).
 - Unreadable ID photo returns `FACE_UNREADABLE` rather than crashing.
 - Automated check confirms **no biometric bytes written to disk** during a request (filesystem watch test). This test is the enforcement mechanism for `DISABLE_BIOMETRIC_STORAGE` (§7.2, must always be `true`).
+- `FACE_MODEL` switches the loaded model (test), and the default model's **weights** licence is recorded in the §4.3.2 table with a link to the licence file.
+- The default model's accuracy is measured on a consented set of Sierra Leonean faces and published, as the OCR accuracy figure is. Spec §12.6 treats this as a ship gate: error rates are known to be worse for darker-skinned faces, so an unmeasured default is an unquantified harm.
 
 ---
 
@@ -109,13 +111,14 @@ Tasks:
 **Goal:** Risk scoring from tampering, recapture, duplicate, and font signals.
 
 Tasks:
-- Implement ELA (digital tampering), BRISQUE (screen recapture), SHA-256 duplicate-NIN check against a rolling 24h log, expired-document check, font-anomaly variance check.
+- Implement ELA (digital tampering), BRISQUE (screen recapture), duplicate-NIN check against a rolling 24h log, expired-document check, font-anomaly variance check. The duplicate check stores an **HMAC-SHA-256 of the NIN keyed with `DUPLICATE_HASH_KEY`**, never a plain hash: the NIN keyspace is small enough to brute-force a plain digest back to the NIN (spec §4.4.1).
 - Reserve `nfc_data_matches_ocr: false` as a high-severity signal slot to be populated by the NFC layer (Week 14).
 - Wire risk weights and confidence = 100 − accumulated risk from `sierrafy.config.json`.
 
 **Testable deliverables:**
 - A Photoshopped sample raises a `digital_tampering` signal; a clean sample does not.
-- Submitting the same NIN twice in a session triggers `duplicate_nin`; the hash purges after 24h (time-mocked test).
+- Submitting the same NIN twice in a session triggers `duplicate_nin`; the digest purges after 24h (time-mocked test).
+- The duplicate check **refuses to run with `DUPLICATE_HASH_KEY` unset** rather than falling back to an unkeyed hash (test), and the same NIN under two different keys produces two different digests (test).
 - A simulated chip-vs-OCR mismatch produces a high-severity `nfc_data_matches_ocr` signal (test with stubbed NFC input).
 - Confidence score equals 100 minus the summed configured weights (deterministic unit test).
 
@@ -149,7 +152,7 @@ Tasks:
 Tasks:
 - JS SDK (TypeScript, rollup): `Sierrafy` client with `verify`, `validateNin`, `ocr`, `faceMatch`.
 - Python SDK (httpx + pydantic) with matching methods and typed responses.
-- Ship the **consent-logging utility** (§9.3): records a consent timestamp + consent-version string alongside each verification result. Surface it in both SDKs. Final consent wording is gated on the NATCOM legal review (dependency table, before Week 17) — build the mechanism now, leave the version string configurable.
+- Ship the **consent-logging utility** (§9.3): records a consent timestamp + consent-version string alongside each verification result. Surface it in both SDKs. Final consent wording is gated on the NatCA legal review (dependency table, before Week 17) — build the mechanism now, leave the version string configurable.
 - Write quickstart docs for each.
 
 **Testable deliverables:**
@@ -266,4 +269,4 @@ Tasks:
 | ≥10 high-res samples per document type | Weeks 3 / 5 | Zone-map coordinates stay estimated |
 | eID chip data-group layout (ICAO 9303 vs X Infotech proprietary) | Week 14 | Stock eMRTD libraries may need rework |
 | NCRA CSCA root certificate (PEM) | Week 14+ | NFC ships read-only; no full passive auth |
-| NATCOM consent/retention review (lawyer) | Before Week 17 | SDK terms not finalised |
+| NatCA consent/retention review (lawyer), covering the Data Protection and Right to Access Information Act once enacted | Before Week 17 | SDK terms not finalised; `PRIVACY.md` law list stays provisional |

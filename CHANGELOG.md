@@ -12,7 +12,35 @@ scaffold and is marked private.
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-09-27
+### Added
+
+- **Published project policies**, in the repository root and on the docs site:
+  `PRIVACY.md` (what the SDK processes, what it never stores, the single
+  Google Vision egress path, and the laws the design targets, mirrored at
+  [docs.sierrafy.dev/privacy](https://docs.sierrafy.dev/privacy)), `SECURITY.md`
+  (private vulnerability reporting and response-time commitments),
+  `RESPONSIBLE_USE.md` (exclusion, known error rates, over-trust, and the uses
+  the project will not support), and `CODE_OF_CONDUCT.md` (Contributor Covenant
+  2.1 with a named enforcement contact).
+- **Issue templates** that require confirming no real identity data is attached,
+  and route vulnerabilities to private advisories instead of public issues.
+
+### Changed
+
+- **The architecture specification's face match engine is now model-pluggable**
+  (§4.3.2), via `FACE_MODEL`, defaulting to SFace with Apache-2.0 weights.
+  InsightFace `buffalo_l`, previously named as the model, licenses its weights
+  for non-commercial research only and is now benchmarking-only. No shipped code
+  is affected: the face layer is M4 and not yet built.
+- **The specified duplicate-NIN check is now keyed** (§4.4.1): HMAC-SHA-256 with
+  a per-deployment `DUPLICATE_HASH_KEY` rather than a plain SHA-256 digest, which
+  for an 8-character NIN is reversible by exhaustive search. Also M5 and not yet
+  built.
+- The regulator is named **NatCA** (National Communications Authority)
+  throughout, replacing NATCOM.
+- The `0.1.0` release date below now matches the published package.
+
+## [0.1.0] - 2026-10-22
 
 First release. Two of the five verification layers are usable.
 
