@@ -54,6 +54,14 @@ The one exception is opt-in and explicit: setting `OCR_ENGINE=google-vision`
 sends card images to Google Cloud Vision. That is the only egress path in the
 system.
 
+[Privacy](./privacy.md) is the full statement: every field the SDK touches, what
+it never stores, the laws it is designed to align with, and the obligations that
+come with integrating it. [Responsible use][responsible-use] covers what a
+result means for the person on the other side of it, including exclusion and
+error rates.
+
+[responsible-use]: https://github.com/SUBiango/sierrafy/blob/main/RESPONSIBLE_USE.md
+
 ## Not an NCRA product
 
 Sierrafy is an independent open-source project. It is not affiliated with,

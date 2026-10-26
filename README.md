@@ -75,11 +75,42 @@ for configuring the (still provisional) NIN format, or
 Working on Sierrafy itself rather than building with it? That setup is in
 [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
+## Privacy, security and responsible use
+
+Four short documents, and they are worth the five minutes before you integrate:
+
+| Document | What it tells you |
+|---|---|
+| [`PRIVACY.md`](PRIVACY.md) | Every field the SDK touches, the fact that it stores none of them, the one opt-in path by which an image leaves your infrastructure, and the laws the design targets. Also at [docs.sierrafy.dev/privacy](https://docs.sierrafy.dev/privacy). |
+| [`RESPONSIBLE_USE.md`](RESPONSIBLE_USE.md) | What a result means for the person on the other side of it: who gets excluded, the known error rates and why they are not evenly distributed, and the uses this project will not support. |
+| [`SECURITY.md`](SECURITY.md) | How to report a vulnerability privately, and what happens then. |
+| [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | How contributors treat each other, and the one rule that is absolute: never post a real identity document here. |
+
+The short version of all four: **no biometric data is ever stored**, nothing is
+reported back to anyone, and a `valid: true` means well formed, not registered.
+
 ## Contributing
 
 Contributions are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the
 development setup, the project conventions, and the constraints that are not
-negotiable. The roadmap and component specs live in the architecture document.
+negotiable. Participation is governed by the
+[Contributor Covenant](CODE_OF_CONDUCT.md). The roadmap and component specs live
+in the architecture document.
+
+**Never commit a real ID sample, or any value read off one.** Real samples are
+gitignored and `pnpm run check:pii` fails the build on a NIN-shaped literal that
+is not on the synthetic allowlist. Use a synthetic stand-in.
+
+## Ownership
+
+Sierrafy is owned and maintained by **Umaru S. Biango**, an individual developer
+based in Sierra Leone. All code in this repository is the maintainer's own work,
+except for third-party dependencies used under their own open-source licences.
+The OCR zone maps are derived measurements of document layouts, not copies of
+card images.
+
+It is an independent open-source project: not affiliated with, endorsed by, or
+operated by NCRA, MoCTI, or any Sierra Leonean government body.
 
 ## License
 
