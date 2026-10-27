@@ -46,8 +46,17 @@ Five verification layers, usable independently or together:
    chip, in the mobile SDKs. *Planned (M9 and M10).*
 
 Delivered as a self-hostable REST gateway (Docker) plus SDKs for JavaScript,
-Python, PHP, React Native, and Flutter. Fully offline-capable, and **no biometric
-data is ever stored**.
+Python, PHP, React Native, and Flutter. **No biometric data is ever stored**, and
+no identity data is transmitted anywhere unless you opt into the Google Vision
+OCR engine.
+
+Offline-capable, with one setup step to be literal about it: the Tesseract
+language model is not bundled in the package, so the first OCR run downloads
+`eng.traineddata` from a CDN and caches it. That request carries no identity
+data, and it does need internet. Supply the model locally, via
+`TESSERACT_CACHE_PATH` or `ocr(image, { tesseract: { cachePath } })`, and OCR
+runs air-gapped. See
+[Staying offline](https://docs.sierrafy.dev/ocr#staying-offline).
 
 See the full spec:
 [`docs/architecture/Sierrafy_Architecture_v1.1.md`](docs/architecture/Sierrafy_Architecture_v1.1.md).

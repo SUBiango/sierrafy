@@ -758,6 +758,8 @@ docker compose up -d
 | `DUPLICATE_HASH_KEY` | **Required for the duplicate-NIN check.** Per-deployment secret for the HMAC-SHA-256 digest (§4.4.1). Never shared between deployments; the check refuses to run unkeyed |
 | `OCR_ENGINE` | `tesseract` (default) or `google-vision` |
 | `GOOGLE_VISION_KEY` | Required only if `OCR_ENGINE=google-vision` |
+| `TESSERACT_CACHE_PATH` | Directory holding `eng.traineddata`, plain and uncompressed. **Set this for any offline deployment:** unset, `tesseract.js` downloads the model from the jsdelivr CDN on first use (default: the process working directory) |
+| `TESSERACT_LANG_PATH` | Where the model is loaded from on a cache miss: a mirror URL, or a local directory holding `eng.traineddata.gz`. Optional |
 | `LOG_LEVEL` | `error` \| `warn` \| `info` \| `debug` |
 | `DISABLE_BIOMETRIC_STORAGE` | Must always be `true` — prevents accidental logging of face data |
 | `RATE_LIMIT_PER_MIN` | Max requests per API key per minute (default: 60) |
@@ -772,7 +774,7 @@ docker compose up -d
 - **Network** — outbound not required in Phase 1 (fully offline-capable)
 - **OS** — Ubuntu 22.04 LTS or any Docker-compatible Linux distribution
 
-> **Offline operation:** Sierrafy Phase 1 is fully offline-capable. All OCR models, face embedding models, and zone maps are bundled in the Docker image. No external API calls are made unless the developer explicitly configures Google Vision as the OCR engine. This is critical for deployments in Sierra Leone where internet reliability may be intermittent.
+> **Offline operation:** Sierrafy Phase 1 is offline-capable, and the distinction between two claims matters. **No identity data leaves the machine** unless the developer explicitly configures Google Vision as the OCR engine: that is unconditional. **No network call at all** is conditional, and the condition is the OCR language model. `tesseract.js` does not bundle `eng.traineddata`, so left to itself it downloads the model from the jsdelivr CDN on first use; the request carries no personal data, and it still fails on an air-gapped host. The Docker image must therefore bundle `eng.traineddata` alongside the face embedding models and zone maps, and set `TESSERACT_CACHE_PATH` to it (§7.2). With that done the deployment is genuinely offline, which is critical in Sierra Leone where internet reliability may be intermittent. The Week 17-18 offline-guarantee test asserts it on an image with no network access, not merely with Google Vision disabled.
 
 ---
 

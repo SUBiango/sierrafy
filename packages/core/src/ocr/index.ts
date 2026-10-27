@@ -1,7 +1,12 @@
 import { resolveEngine } from './engines';
 import { normalizeDob } from './normalize-dob';
 import { loadZoneMap } from './zone-map';
-import type { DocumentType, OcrEngineName, OcrResult } from './types';
+import type {
+  DocumentType,
+  OcrEngineName,
+  OcrResult,
+  TesseractEngineOptions,
+} from './types';
 
 export {
   crossCheck,
@@ -9,6 +14,7 @@ export {
   NAME_MATCH_THRESHOLD,
 } from './cross-check';
 export type { SubmittedFields } from './cross-check';
+export type { TesseractEngineOptions } from './types';
 export { normalizeDob } from './normalize-dob';
 export { loadZoneMap, toPixelBox } from './zone-map';
 export { resolveEngine } from './engines';
@@ -22,13 +28,22 @@ export interface OcrOptions {
   documentType?: 'auto' | DocumentType;
   /** Override the engine; defaults to `OCR_ENGINE` env, else `tesseract`. */
   engine?: OcrEngineName;
+  /**
+   * Tune the default Tesseract engine. Set `cachePath` to a directory holding a
+   * plain `eng.traineddata` to run with no network access at all; `langPath`
+   * takes a mirror URL or a directory holding `eng.traineddata.gz`.
+   */
+  tesseract?: TesseractEngineOptions;
 }
 
 /**
  * Extract NIN, name, and DOB from a Sierra Leone ID image and return the
- * `/v1/ocr` response shape (Architecture Spec §5.2). Offline by default
- * (Tesseract); `google-vision` is the only outbound path. Never throws on
- * unreadable/unsupported input — those surface as `error` on the result.
+ * `/v1/ocr` response shape (Architecture Spec §5.2). Recognition is local by
+ * default (Tesseract), and `google-vision` is the only path that sends
+ * identity data anywhere. The local default may fetch its language model once
+ * unless `tesseract.langPath` or `tesseract.cachePath` points at a copy; that
+ * request carries no identity data. Never throws on unreadable/unsupported
+ * input — those surface as `error` on the result.
  * See `specs/002-ocr-engine-eid-zone-map/spec.md`.
  */
 export async function ocr(
@@ -48,7 +63,7 @@ export async function ocr(
 
   const image = Buffer.isBuffer(idImage) ? idImage : Buffer.from(idImage);
   const zoneMap = loadZoneMap(documentType);
-  const engine = resolveEngine(options.engine);
+  const engine = resolveEngine(options.engine, options.tesseract);
   const recognition = await engine.recognize(image, zoneMap);
 
   const nin = recognition.zones.nin ?? '';

@@ -86,12 +86,28 @@ configuration path.
 ```ts
 import { ocr, crossCheck } from '@sierrafy/sdk/ocr';
 
-const result = await ocr(imageBuffer); // Tesseract, fully offline
+const result = await ocr(imageBuffer); // Tesseract, recognises locally
 // { document_type: 'SL_NATIONAL_EID',
 //   extracted: { nin, name, dob }, ocr_confidence: 0.82 }
 
 crossCheck(result, { nin: 'ABCD1234', name: 'Aminata Kamara', dob: '1992-04-17' });
 ```
+
+No identity data leaves the machine: recognition runs on local WebAssembly. The
+one network call is the Tesseract language model, which is not bundled, so the
+first run fetches `eng.traineddata` from the jsdelivr CDN and caches it. It
+carries no personal data, and it still fails on a machine with no internet.
+Give it a local copy and OCR is genuinely air-gapped:
+
+```ts
+await ocr(imageBuffer, { tesseract: { cachePath: '/opt/tessdata' } });
+// or, process-wide: TESSERACT_CACHE_PATH=/opt/tessdata
+```
+
+`cachePath` holds a plain `eng.traineddata`, the file `tessdata_fast` publishes.
+`langPath` is for a mirror URL, or a directory holding `eng.traineddata.gz`,
+since `tesseract.js` appends `.gz` there. Full detail:
+[Staying offline](https://docs.sierrafy.dev/ocr#staying-offline).
 
 Offline NIN extraction accuracy on the current 10-sample set is **20%**, below
 the 80% target. The causes and the path forward are documented in

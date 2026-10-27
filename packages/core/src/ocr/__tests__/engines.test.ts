@@ -19,7 +19,10 @@ describe('resolveEngine — selection & offline default (AC #5)', () => {
     jest.restoreAllMocks();
   });
 
-  it('defaults to the offline tesseract engine and makes no outbound call', () => {
+  // Resolution itself must not touch the network. The engine's own one call,
+  // for the language model, happens on first recognition and is covered in
+  // tesseract.test.ts along with the paths that remove it.
+  it('defaults to the local tesseract engine without touching the network', () => {
     delete process.env.OCR_ENGINE;
     const fetchSpy = jest.spyOn(globalThis, 'fetch');
     const engine = resolveEngine();
