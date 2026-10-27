@@ -16,16 +16,6 @@ scaffold and is marked private.
 
 ### Added
 
-- **`cachePath` and `langPath` on the Tesseract engine**, as
-  `ocr(image, { tesseract: { cachePath } })`, `createTesseractEngine({ ... })`,
-  or the `TESSERACT_CACHE_PATH` and `TESSERACT_LANG_PATH` environment variables.
-  Point `cachePath` at a directory holding a plain `eng.traineddata` and OCR
-  runs with no network access at all, which is verified end to end against the
-  real model file. An explicit option beats the environment variable, which
-  beats the `tesseract.js` CDN default. Note that a local `langPath` wants
-  `eng.traineddata.gz`, because `tesseract.js` appends `.gz` there; that is why
-  `cachePath` is the documented route for a plain file.
-
 - **Published project policies**, in the repository root and on the docs site:
   `PRIVACY.md` (what the SDK processes, what it never stores, the single
   Google Vision egress path, and the laws the design targets, mirrored at
@@ -37,8 +27,31 @@ scaffold and is marked private.
 - **Issue templates** that require confirming no real identity data is attached,
   and route vulnerabilities to private advisories instead of public issues.
 
+### Added
+
+- **`cachePath` and `langPath` on the Tesseract engine**, as
+  `ocr(image, { tesseract: { cachePath } })`, `createTesseractEngine({ ... })`,
+  or the `TESSERACT_CACHE_PATH` and `TESSERACT_LANG_PATH` environment variables.
+  Point `cachePath` at a directory holding a plain `eng.traineddata` and OCR
+  runs with no network access at all, which is verified end to end against the
+  real model file. An explicit option beats the environment variable, which
+  beats the `tesseract.js` CDN default. Note that a local `langPath` wants
+  `eng.traineddata.gz`, because `tesseract.js` appends `.gz` there; that is why
+  `cachePath` is the documented route for a plain file.
+
 ### Fixed
 
+- **Two high-severity advisories in `sharp`'s image decoders.** `sharp` is
+  bumped to `^0.35.5` as both the optional peer and the dev dependency, and the
+  lockfile moves from 0.35.2 to 0.35.5. The vulnerabilities are in librsvg
+  (CVE-2026-96889) and libheif (GHSA-g89c-p67h-r497, GHSA-2jg2-4ch7-h545),
+  which `sharp` bundles. This matters more here than the severities suggest:
+  decoding an image supplied by whoever is being verified is exactly what the
+  OCR engine does, so a malicious card photo was the attack path. The previous
+  `^0.35.2` range already permitted a patched version, so a consumer installing
+  fresh was fine; the floor now rules out the vulnerable ones for everybody.
+  Raising the floor is visible to consumers: a project pinned below 0.35.5 will
+  see a peer warning, and upgrading is the fix.
 - **Corrected an overstated offline claim.** The docs, the README and `0.1.0`'s
   changelog entry said the default engine makes no outbound network call. It
   does make one: `tesseract.js` does not bundle `eng.traineddata`, so the first
