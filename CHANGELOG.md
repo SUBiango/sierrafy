@@ -12,6 +12,8 @@ scaffold and is marked private.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-27
+
 ### Added
 
 - **Published project policies**, in the repository root and on the docs site:
@@ -117,5 +119,6 @@ First release. Two of the five verification layers are usable.
 - Published from CI with npm provenance, so the tarball can be traced to the
   commit and workflow that built it.
 
-[Unreleased]: https://github.com/SUBiango/sierrafy/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/SUBiango/sierrafy/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/SUBiango/sierrafy/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/SUBiango/sierrafy/releases/tag/v0.1.0
