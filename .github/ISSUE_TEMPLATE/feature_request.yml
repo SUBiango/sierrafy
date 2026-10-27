@@ -1,0 +1,50 @@
+name: Feature request or question
+description: Propose a change, or ask about something that is not a bug.
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Never attach a real identity document
+
+        No real eID cards, passport pages, selfies, National Identification
+        Numbers, Personal ID Numbers, or chip dumps, in any field or screenshot.
+        Use a synthetic value such as `ABCD1234` or the specimen card on
+        [sierrafy.dev](https://sierrafy.dev).
+
+        Worth reading first: the
+        [architecture specification](https://github.com/SUBiango/sierrafy/blob/main/docs/architecture/Sierrafy_Architecture_v1.1.md)
+        covers what is already planned, and
+        [`RESPONSIBLE_USE.md`](https://github.com/SUBiango/sierrafy/blob/main/RESPONSIBLE_USE.md)
+        covers the uses this project will not support, including bulk lookup,
+        enumeration, one-to-many face search, and surveillance.
+
+  - type: checkboxes
+    id: no-real-ids
+    attributes:
+      label: Confirmation
+      options:
+        - label: This request contains no real identity document data, only synthetic values.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do, and what stops you today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like to see
+      description: A concrete proposal is easier to act on than a general direction.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else
+      description: Alternatives you tried, links, or prior art. Optional.

@@ -12,7 +12,7 @@ Version 1.1 · Phase 1 + NFC · Draft for Development
 | Version | 1.1 — Added NFC chip verification layer |
 | Classification | Public / Open Source |
 | Target audience | Solo developer / open-source contributors |
-| Licence | MIT (proposed) |
+| Licence | MIT (`LICENSE` in the repository root); OCR zone maps CC0 |
 
 ---
 
@@ -51,7 +51,7 @@ The toolkit performs five verification layers: NIN format validation, document O
 
 Sierra Leone reached 93% NIN registration coverage as of June 2025, and NCRA has built the national ID foundation the country now runs on. The NIN is legally mandatory for opening a bank account, enrolling in education, accessing employment, and registering a SIM card. What is still missing is accessible, developer-friendly tooling that lets the wider ecosystem — startups, fintechs, NGOs, and government agencies building digital products — adopt NIN verification without specialised identity expertise.
 
-Today, integrating verification at the individual-check level remains out of reach for most small builders: NCRA's eKYC API is priced at around USD 30 per NIN check, which adds up quickly for high-volume onboarding flows and is hard to justify for early-stage products still finding traction. International providers (Smile ID, uqudo, Dojah) either do not cover Sierra Leone's NIN database or are oriented toward enterprise clients. The result is that many Sierra Leonean apps skip identity verification entirely — increasing fraud exposure, weakening KYC, and slowing trusted digital adoption.
+Today, integrating verification at the individual-check level remains out of reach for most small builders. There is no developer sandbox, no self-hostable option, and no free path for the structural checks that do not need the registry at all, so a two-person startup has no on-ramp between building nothing and committing to an enterprise onboarding contract. International providers (Smile ID, uqudo, Dojah) either do not cover Sierra Leone's NIN database or are oriented toward enterprise clients. The result is that many Sierra Leonean apps skip identity verification entirely — increasing fraud exposure, weakening KYC, and slowing trusted digital adoption.
 
 ### 2.2 What Sierrafy solves
 
@@ -89,7 +89,7 @@ Developers can use the Core SDK directly for server-side integration (no gateway
     |
     |--- 1. NIN format validator    (sync, in-process)
     |--- 2. Document OCR engine     (Tesseract / custom model)
-    |--- 3. Face match engine       (DeepFace / InsightFace)
+    |--- 3. Face match engine       (pluggable model, see 4.3.2)
     |--- 4. Fraud signal checks     (metadata, duplicate detection)
     |--- 5. NFC chip verifier       (passive auth — mobile SDK only)
     |
@@ -247,10 +247,23 @@ The face match engine compares the user's selfie against the portrait photo extr
 | Concern | Chosen library |
 |---|---|
 | Face detection | face-api.js (TensorFlow.js backend) — runs in Node.js |
-| Face embedding / comparison | DeepFace (Python microservice) or InsightFace (Python) |
+| Face embedding / comparison | Pluggable via `FACE_MODEL` (§7.2). Default `sface`: SFace (`face_recognition_sface`, OpenCV Zoo), ONNX weights under Apache 2.0, run through OpenCV DNN in the Python microservice |
 | Liveness detection (basic) | Passive liveness — BRISQUE sharpness score, blink detection via MediaPipe (optional, client-side) |
 | Threshold | Cosine similarity >= 0.82 for PASS (tunable via config) |
 | Fallback | If the ID photo cannot be extracted cleanly, return `FACE_UNREADABLE` and skip match |
+
+**The embedding model is a configuration value, not a hard-coded dependency.** `FACE_MODEL` selects it, the face service loads the matching weights, and the threshold is tuned per model. Two constraints govern which models may be offered, and the default in particular:
+
+1. **The weights must be licensed for commercial use, and the weights' licence is the one that counts.** A permissive licence on the inference library says nothing about the model files it downloads. Earlier drafts of this document named InsightFace `buffalo_l` as the model. InsightFace's *code* is MIT, but its pretrained models, `buffalo_l` included, are released for non-commercial research only and require a separate licence from the authors for commercial use. Shipping them as the default would make the one mandatory component of the face layer more restrictive than the rest of Sierrafy: fintechs could not use the face match in production, and the project would fail the platform-independence test the DPG Standard applies (indicator 4), which treats a mandatory dependency with a more restrictive licence as a closed component. `buffalo_l` therefore remains selectable for research and benchmarking, and is not the default.
+2. **The default must be measured on Sierra Leonean faces before M4 ships, and the number published.** Face recognition error rates vary with skin tone, and published rates are consistently worse for darker-skinned faces. A model that has not been evaluated locally does not get to be the default, regardless of its headline accuracy. See §12.6 and [`RESPONSIBLE_USE.md`](../../RESPONSIBLE_USE.md).
+
+| `FACE_MODEL` | Model | Weights licence | Use |
+|---|---|---|---|
+| `sface` (default) | SFace, OpenCV Zoo `face_recognition_sface` | Apache 2.0 | Production default, pending the local evaluation in §12.6 |
+| `facenet` | FaceNet via DeepFace | Verify before enabling: DeepFace's code is MIT, each model it downloads carries its own terms | Alternative, licence to be confirmed per weight file |
+| `buffalo_l` | InsightFace `buffalo_l` | Non-commercial research only; commercial use needs a licence from the authors | Research and benchmarking only, never the default |
+
+Adding a model means adding a row to that table with the **weights'** licence recorded, not the library's.
 
 #### 4.3.3 Face match architecture
 
@@ -269,14 +282,15 @@ services:
     build: ./services/face-engine
     environment:
       - MATCH_THRESHOLD=0.82
-      - MODEL=insightface-buffalo-l
+      # Pluggable; the default ships Apache-2.0 weights (§4.3.2)
+      - FACE_MODEL=${FACE_MODEL:-sface}
 ```
 
 #### 4.3.4 Privacy considerations
 
 Biometric data (face embeddings and selfie images) must never be stored by the Sierrafy gateway. All face processing is ephemeral — images are processed in memory, embeddings are compared and discarded, and no biometric data is written to disk or database. This is a hard architectural constraint, not a configuration option.
 
-> **Privacy-by-design requirement:** Sierrafy stores NO biometric data. Face images and embeddings are processed in memory and discarded immediately after the match score is returned. Developers may not configure the gateway to persist these. This is required for compliance with Sierra Leone's data protection provisions under the Telecommunications Act 2006 and NATCOM guidelines.
+> **Privacy-by-design requirement:** Sierrafy stores NO biometric data. Face images and embeddings are processed in memory and discarded immediately after the match score is returned. Developers may not configure the gateway to persist these. The design target is the data protection guidance of the National Communications Authority (NatCA) under the Telecommunications Act 2006, together with the Data Protection and Right to Access Information Act that Cabinet approved on 21 April 2026 and which is not yet enacted. Until that Act is law, this is a design commitment the project holds itself to rather than a statutory obligation it is claiming to discharge. See [`PRIVACY.md`](../../PRIVACY.md).
 
 ---
 
@@ -288,10 +302,18 @@ Biometric data (face embeddings and selfie images) must never be stored by the S
 |---|---|---|---|
 | Digital tampering | ELA (Error Level Analysis) on card image | Photoshopped NIN or photo regions | High |
 | Screen recapture | BRISQUE noise pattern analysis | Photo taken of a screen or printout | High |
-| Duplicate NIN | SHA-256 hash of NIN checked against request log | Same NIN submitted multiple times in session | Medium |
+| Duplicate NIN | HMAC-SHA-256 of the NIN, keyed with a per-deployment secret, checked against the rolling request log | Same NIN submitted multiple times in session | Medium |
 | Expired document | DOB + issue date extracted vs current date | Expired ID being reused | Medium |
 | Font anomaly | Zone-specific pixel variance check | Altered text on card fields | Medium |
 | Selfie–photo mismatch | Embedding distance outside threshold | Wrong person presenting the card | High |
+
+**Why the duplicate check is keyed and not a plain hash.** A NIN is 8 characters drawn from a 36-character alphabet, so the entire keyspace is about 2.8 trillion values. A plain SHA-256 digest of one is reversible by exhaustive search on a single consumer GPU in minutes, which means an unkeyed hash of a NIN *is* the NIN, and a stolen request log is a list of the identifiers of everyone who was verified. HMAC-SHA-256 with a secret the attacker does not hold removes that: without the key there is no dictionary to build.
+
+Three rules follow, and they are requirements rather than recommendations:
+
+- The key comes from `DUPLICATE_HASH_KEY` (§7.2). The gateway refuses to start the duplicate check if it is unset, rather than silently degrading to an unkeyed hash.
+- The key is **per deployment** and is never shared between deployments, which stops one operator's log being used to look up another's.
+- The digest is **pseudonymised personal data**, not anonymous data. It stays inside the 24-hour purge window of §9.2, is excluded from exports and audit logs, and is treated as personal data in the operator's own records.
 
 #### 4.4.2 Risk scoring
 
@@ -732,6 +754,8 @@ docker compose up -d
 | `PORT` | Gateway HTTP port (default: 3000) |
 | `API_KEY_SEED` | Seed for generating and validating API keys |
 | `FACE_THRESHOLD` | Cosine similarity threshold for face match pass (default: 0.82) |
+| `FACE_MODEL` | Face embedding model (default: `sface`, Apache-2.0 weights). See §4.3.2 for the permitted values and their weights' licences |
+| `DUPLICATE_HASH_KEY` | **Required for the duplicate-NIN check.** Per-deployment secret for the HMAC-SHA-256 digest (§4.4.1). Never shared between deployments; the check refuses to run unkeyed |
 | `OCR_ENGINE` | `tesseract` (default) or `google-vision` |
 | `GOOGLE_VISION_KEY` | Required only if `OCR_ENGINE=google-vision` |
 | `LOG_LEVEL` | `error` \| `warn` \| `info` \| `debug` |
@@ -760,7 +784,9 @@ docker compose up -d
 | OCR | Tesseract.js v5 | JavaScript | Apache 2.0 |
 | Image processing | Sharp | Node.js (libvips) | Apache 2.0 |
 | Face detection | face-api.js | TypeScript | MIT |
-| Face matching | InsightFace / DeepFace | Python | MIT / Apache |
+| Face matching (inference) | OpenCV DNN (`opencv-python`) | Python | Apache 2.0 |
+| Face matching (default weights) | SFace, OpenCV Zoo `face_recognition_sface` | ONNX model file | Apache 2.0 |
+| Face matching (alternative weights) | Selected by `FACE_MODEL`; each model's **weights** licence is recorded in §4.3.2, which is the licence that governs use. InsightFace `buffalo_l` weights are non-commercial research only and are never the default | ONNX model files | Per model, see §4.3.2 |
 | Face service framework | FastAPI | Python | MIT |
 | Error level analysis | python-ela | Python | MIT |
 | MRZ parsing | mrz-detection | JavaScript | MIT |
@@ -797,7 +823,7 @@ docker compose up -d
 
 | Data type | Retention |
 |---|---|
-| NIN (hashed for duplicate check) | Rolling 24-hour window, then purged |
+| NIN (keyed HMAC-SHA-256 digest for the duplicate check; pseudonymised personal data, not anonymous, see §4.4.1) | Rolling 24-hour window, then purged |
 | ID card images | Never stored — memory-only processing |
 | Selfie images | Never stored — memory-only processing |
 | Face embeddings | Never stored — discarded after match |
@@ -806,7 +832,20 @@ docker compose up -d
 
 ### 9.3 Consent requirement
 
-Developers integrating Sierrafy are required (by the SDK terms) to obtain explicit informed consent from their users before initiating a verification request. The SDK includes a consent-logging utility that records a consent timestamp and version alongside the verification result. This is a legal requirement under Sierra Leone's data protection provisions.
+Developers integrating Sierrafy are required (by the SDK terms) to obtain explicit informed consent from their users before initiating a verification request. The SDK includes a consent-logging utility that records a consent timestamp and version alongside the verification result.
+
+Sierra Leone has no data protection statute in force. Cabinet approved a National Data Protection Policy and the Data Protection and Right to Access Information Act on 21 April 2026, and the bill was not yet enacted as of October 2026. The consent requirement is therefore stated as a **term of use that the project imposes on integrators**, designed for that Act and for the ECOWAS Supplementary Act on Personal Data Protection (2010), rather than as compliance with a law already on the books. The full list of instruments the design targets is in [`PRIVACY.md`](../../PRIVACY.md), and the Sierra Leone-qualified review of the consent wording is tracked in §12.5.
+
+### 9.4 Published policies
+
+Four documents in the repository root carry the commitments in this section in a form a reviewer, an integrator, or a contributor can read without the specification:
+
+| Document | What it covers |
+|---|---|
+| [`PRIVACY.md`](../../PRIVACY.md) | Every field the SDK processes, what it never stores, the single Google Vision egress path, integrator obligations, and the laws the design targets |
+| [`SECURITY.md`](../../SECURITY.md) | Private vulnerability reporting through GitHub advisories, response-time commitments, and what is in and out of scope |
+| [`RESPONSIBLE_USE.md`](../../RESPONSIBLE_USE.md) | Exclusion of people without a usable NIN, known error rates and their uneven distribution, over-trust in `valid: true`, and the uses the project refuses to support |
+| [`CODE_OF_CONDUCT.md`](../../CODE_OF_CONDUCT.md) | Contributor Covenant 2.1, the named enforcement contact, younger contributors, and the prohibition on posting real identity data |
 
 ---
 
@@ -871,9 +910,19 @@ sierrafy/
 ├── csca-certs/         # NCRA root certificate PEM (added when obtained)
 │   └── SL_NCRA_CSCA.pem
 ├── dashboard/          # React admin UI
-├── docs/               # Documentation site (Docusaurus)
+├── website/            # Documentation site (Docusaurus) -> docs.sierrafy.dev
+├── site/               # Landing page (single static file) -> sierrafy.dev
+├── docs/               # Architecture spec and development notes
+├── specs/              # Per-milestone acceptance criteria
+├── scripts/            # check:pii guard and the synthetic-literal allowlist
 ├── docker-compose.yml
 ├── .env.example
+├── PRIVACY.md          # What is processed, what is never stored (§9.4)
+├── SECURITY.md         # Vulnerability reporting (§9.4)
+├── RESPONSIBLE_USE.md  # Do-no-harm commitments (§9.4)
+├── CODE_OF_CONDUCT.md  # Contributor Covenant 2.1 (§11.3)
+├── CONTRIBUTING.md
+├── LICENSE             # MIT
 └── README.md
 ```
 
@@ -885,6 +934,8 @@ Sierrafy is released under the MIT Licence. All contributions to the main reposi
 
 Initial governance is maintainer-led (solo developer). As the project gains contributors, a Technical Steering Committee will be proposed — modelled on similar open-source civic-tech projects in Africa. NCRA and MoCTI will be invited as advisory stakeholders once Phase 2 partnership discussions begin.
 
+All collaboration happens in public on the GitHub repository: issues, pull requests, code review, and commit messages. There are no private channels. Behaviour in those spaces is governed by [`CODE_OF_CONDUCT.md`](../../CODE_OF_CONDUCT.md), the Contributor Covenant 2.1, with the maintainer as the named enforcement contact. It carries two project-specific additions: a section on younger contributors, because the national DPG pipeline recruits from universities and schools, and an absolute prohibition on posting real identity documents or data read off them anywhere in the repository. The second is enforced technically as well as socially, by `pnpm run check:pii` in CI.
+
 ---
 
 ## 12. Open Questions and Assumptions
@@ -895,11 +946,13 @@ Initial governance is maintainer-led (solo developer). As the project gains cont
 
 2. **Zone map coordinates** — the pixel bounding boxes for OCR zones for both the National eID Card and Passport have been estimated from publicly available card photos. Accurate coordinates require a controlled set of high-resolution scans of each document type. Priority: source at least 10 samples per document type before M2/M3 milestones.
 
-3. **NCRA developer sandbox** — Phase 2 depends on NCRA offering a sandbox and a developer tier suited to smaller builders. The existing eKYC API is priced at around USD 30 per NIN check, which is difficult for early-stage and high-volume products to absorb. A partnership proposal should be drafted — framed around expanding trusted NIN adoption across the developer ecosystem — citing the MoCTI open-source software policy (November 2025) and the NCRA–MoCTI MoU (May 2024).
+3. **NCRA developer sandbox** — Phase 2 depends on NCRA offering a sandbox and a developer tier suited to smaller builders, which does not exist today. A partnership proposal should be drafted — framed around expanding trusted NIN adoption across the developer ecosystem, not around commercial terms — citing the MoCTI open-source software policy (approved by the Ministry in 2025 and before Cabinet, so cite it as policy in progress rather than as settled law), the NCRA–MoCTI MoU (May 2024), and the national dialogue on digital identity and DPI that MoCTI convened in August 2026 on open-source technology and verifiable credentials.
 
 4. **NCRA CSCA certificate** — full NFC passive authentication requires the NCRA Country Signing Certificate Authority (CSCA) root certificate in PEM format. This is the cryptographic root that proves chip data is genuine. NCRA must either publish this to the ICAO Public Key Directory (PKD) or provide it directly. This should be the first technical ask in the NCRA partnership conversation. Until it is obtained, the NFC layer reads chip data but returns `passive_auth_passed: null` with `CSCA_UNAVAILABLE`. Confirm also whether the eID chip uses standard ICAO 9303 data group layout or a proprietary X Infotech structure — this determines whether existing open-source eMRTD libraries can be used without modification.
 
-5. **NATCOM data protection guidance** — the specific consent language and data retention requirements under NATCOM's data protection enforcement should be reviewed with a Sierra Leone-based lawyer before the SDK terms are finalised.
+5. **NatCA data protection guidance** — the specific consent language and data retention requirements under the data protection guidance of the National Communications Authority (NatCA, the regulator formerly referred to as NATCOM) should be reviewed with a Sierra Leone-based lawyer before the SDK terms are finalised. The review should also cover the Data Protection and Right to Access Information Act once it is enacted; Cabinet approved it on 21 April 2026 and it was not yet law as of October 2026. The published statement to be reviewed is [`PRIVACY.md`](../../PRIVACY.md).
+
+6. **Default face model: weights licence and local accuracy** — two things must be settled before M4 ships, and both are gates rather than nice-to-haves. First, confirm in writing the licence of the **weight file** for whichever model ships as the `FACE_MODEL` default, not the licence of the library that loads it; the default is `sface` precisely because OpenCV Zoo publishes its model files under Apache 2.0, and any replacement must clear the same bar (§4.3.2). Second, evaluate that model on a consented set of Sierra Leonean faces and publish the measured accuracy, the way the 20% OCR figure is published. Face recognition error rates are known to be worse for darker-skinned faces, so an unmeasured default is an unquantified harm, not a neutral starting point.
 
 ---
 

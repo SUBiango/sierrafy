@@ -1,0 +1,93 @@
+name: Bug report
+description: Something in Sierrafy does not work the way it is documented.
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Never attach a real identity document
+
+        Do not paste or upload a real eID card, passport page, selfie,
+        National Identification Number, Personal ID Number, or chip dump. Not in
+        the description, not in a screenshot, not in a log paste. A leaked NIN
+        cannot be unleaked, and an issue is public and permanent.
+
+        Reproduce the bug with a synthetic value from
+        [`scripts/allowed-id-literals.txt`](https://github.com/SUBiango/sierrafy/blob/main/scripts/allowed-id-literals.txt),
+        for example `ABCD1234`, or with the specimen card on
+        [sierrafy.dev](https://sierrafy.dev).
+
+        Found a **security** problem rather than a bug? Do not file it here.
+        Use
+        [private vulnerability reporting](https://github.com/SUBiango/sierrafy/security/advisories/new).
+
+        Note before you start: Phase 1 is offline and structural. A well-formed
+        NIN that was never issued returning `valid: true` is documented
+        behaviour, not a bug. See
+        [Scope](https://docs.sierrafy.dev/scope).
+
+  - type: checkboxes
+    id: no-real-ids
+    attributes:
+      label: Confirmation
+      options:
+        - label: This report contains no real identity document data, only synthetic values.
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, and what the result was.
+      placeholder: |
+        validateNin('ABCD1234') returned ... and I expected ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: Link the documentation or spec section that says so, if there is one.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: The smallest code sample or command that shows it, with synthetic data only.
+      render: ts
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Sierrafy version
+      placeholder: '@sierrafy/sdk 0.1.0'
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Node version and operating system
+      placeholder: 'Node 22.9.0, Ubuntu 22.04'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part
+      options:
+        - NIN format validation
+        - Document OCR
+        - Zone maps
+        - Format schema loading
+        - Documentation
+        - Build, packaging, or install
+        - Something else
+    validations:
+      required: true

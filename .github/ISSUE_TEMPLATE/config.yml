@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/SUBiango/sierrafy/security/advisories/new
+    about: Private vulnerability reporting. Never file a vulnerability as a public issue, and never attach a real identity document to one.
+  - name: Report real identity data found in this repository
+    url: https://github.com/SUBiango/sierrafy/security/advisories/new
+    about: Report it privately rather than quoting it in a public issue. It is removed within 48 hours and purged from git history.
+  - name: Documentation
+    url: https://docs.sierrafy.dev
+    about: Install, the NIN validator API, configuring the format, OCR, privacy, and what a result does and does not mean.

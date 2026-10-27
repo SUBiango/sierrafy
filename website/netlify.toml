@@ -14,9 +14,24 @@
 # Keeping the docs separate from sierrafy.dev means the landing page deploys with
 # no build step, and a failing docs build cannot block it.
 
+# The node_modules wipe is not paranoia. Netlify restores a cached dependency
+# tree before the build command runs, and a partially restored pnpm tree fails
+# in a way that looks like a dependency bug but is not: `tslib` is a declared
+# dependency of `@docusaurus/logger` and is pinned in the lockfile, so when the
+# build dies on `Cannot find module 'tslib'`, what is missing is the virtual
+# store entry the symlink points at, not the dependency. A `website/node_modules`
+# left behind by Netlify's own install in the package directory can shadow the
+# workspace tree the same way.
+#
+# Deploy previews failed 3 times in 7 this way while all 8 branch builds passed
+# on the identical lockfile, which is the signature of a per-context cache
+# rather than of anything in the repository. `pnpm install` repairs most of it,
+# but not reliably enough to debug twice. The pnpm store is cached separately
+# and outside the repository, so reinstalling from scratch costs seconds.
+
 [build]
   publish = "website/build"
-  command = "pnpm install --frozen-lockfile && pnpm --filter @sierrafy/website build"
+  command = "rm -rf node_modules website/node_modules packages/*/node_modules && pnpm install --frozen-lockfile && pnpm --filter @sierrafy/website build"
 
 [build.environment]
   # Docusaurus 3 needs 18+; 22 matches the rest of CI.
