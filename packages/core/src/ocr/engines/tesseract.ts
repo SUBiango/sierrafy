@@ -3,23 +3,58 @@ import { toPixelBox } from '../zone-map';
 import type {
   OcrEngine,
   RecognitionResult,
+  TesseractEngineOptions,
   ZoneBox,
   ZoneContentType,
   ZoneMap,
 } from '../types';
 
 /**
- * Default, fully-offline OCR engine. For each zone it crops the relative region,
+ * Default, local OCR engine. For each zone it crops the relative region,
  * isolates the text from the card's green guilloche background (green-channel
  * extraction), upscales, and runs Tesseract.js with a per-field character
- * whitelist and single-line page segmentation. Makes **no outbound network
- * calls** — Tesseract runs locally on bundled traineddata.
+ * whitelist and single-line page segmentation.
+ *
+ * **No identity data ever leaves the machine**: recognition itself runs locally
+ * on wasm, and no image, NIN or extracted field is sent anywhere. One caveat
+ * worth stating plainly rather than burying: the `eng.traineddata` language
+ * model is not bundled in this package, so on first use `tesseract.js`
+ * downloads it from the jsdelivr CDN and caches it. That request carries no
+ * identity data, but it is a network call, and on a machine with no internet it
+ * fails. Pass `cachePath` as a directory holding a plain `eng.traineddata` (or
+ * `langPath` as a mirror URL or a directory holding `eng.traineddata.gz`) and
+ * the engine is genuinely offline. See {@link TesseractEngineOptions}.
  *
  * `sharp` and `tesseract.js` are optional peer dependencies loaded on the first
  * `recognize()` call, so merely importing this module costs nothing.
  */
-export function createTesseractEngine(): OcrEngine {
-  return { name: 'tesseract', recognize: recognizeZones };
+export function createTesseractEngine(
+  options: TesseractEngineOptions = {},
+): OcrEngine {
+  const workerOptions = resolveWorkerOptions(options);
+  return {
+    name: 'tesseract',
+    recognize: (image, zoneMap) =>
+      recognizeZones(image, zoneMap, workerOptions),
+  };
+}
+
+/** The subset of `tesseract.js` worker options this engine sets. */
+type WorkerPaths = Pick<TesseractEngineOptions, 'langPath' | 'cachePath'>;
+
+/**
+ * Explicit option wins, then the env var, then `tesseract.js`'s own default.
+ * Keys are omitted rather than set to `undefined`, because `createWorker`
+ * spreads what it is given over its defaults and an explicit `undefined` would
+ * overwrite them.
+ */
+function resolveWorkerOptions(options: TesseractEngineOptions): WorkerPaths {
+  const langPath = options.langPath ?? process.env.TESSERACT_LANG_PATH;
+  const cachePath = options.cachePath ?? process.env.TESSERACT_CACHE_PATH;
+  return {
+    ...(langPath === undefined ? {} : { langPath }),
+    ...(cachePath === undefined ? {} : { cachePath }),
+  };
 }
 
 /** Upscale factor applied before OCR — small card crops read better enlarged. */
@@ -34,6 +69,7 @@ const WHITELIST: Record<Exclude<ZoneContentType, 'photo'>, string> = {
 async function recognizeZones(
   image: Buffer,
   zoneMap: ZoneMap,
+  workerOptions: WorkerPaths = {},
 ): Promise<RecognitionResult> {
   const sharp = await loadSharp();
   const meta = await sharp(image).metadata();
@@ -45,7 +81,8 @@ async function recognizeZones(
   }
 
   const { createWorker, PSM } = await loadTesseract();
-  const worker = await createWorker('eng');
+  // `undefined` for oem keeps tesseract.js's own default (LSTM_ONLY).
+  const worker = await createWorker('eng', undefined, workerOptions);
   try {
     const zones: Record<string, string> = {};
     const confidences: number[] = [];

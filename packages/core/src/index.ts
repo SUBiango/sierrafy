@@ -54,4 +54,5 @@ export type {
   CrossCheckResult,
   RecognitionResult,
   OcrEngine,
+  TesseractEngineOptions,
 } from './ocr/types';

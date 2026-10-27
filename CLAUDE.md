@@ -8,7 +8,10 @@ The project's durable conventions live in [`CONTRIBUTING.md`](CONTRIBUTING.md),
 because human contributors need them too. Follow them exactly. They cover:
 
 - **Architectural constraints** that are not configurable: no biometric data is
-  ever persisted, Phase 1 is fully offline-capable, NFC passive auth degrades to
+  ever persisted, no identity data is transmitted unless Google Vision is opted
+  into (Phase 1 is offline-capable, but the Tesseract model download is a real
+  network call until `TESSERACT_CACHE_PATH` holds a local copy), NFC passive
+  auth degrades to
   `CSCA_UNAVAILABLE` rather than failing, and unconfirmed spec details stay
   schema-driven rather than hard-coded.
 - **Real ID samples and PII**, including the rule that trips people up: a real NIN

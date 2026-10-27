@@ -72,10 +72,66 @@ error rather than bad input.
 
 ## Staying offline
 
-The default Tesseract engine makes **no outbound network call**. Setting
-`OCR_ENGINE=google-vision` with a `GOOGLE_VISION_KEY` routes to Google Cloud
-Vision instead, which is markedly more accurate and is the only code path in
-Sierrafy that leaves your machine. It is off unless you turn it on.
+**No identity data leaves your machine on the default engine.** Recognition runs
+locally on WebAssembly, and no image, NIN or extracted field is sent anywhere.
+
+There is one caveat, and it is worth stating precisely rather than glossing:
+`eng.traineddata`, the Tesseract language model, is not bundled in this package.
+On the first `ocr()` call `tesseract.js` downloads it from the jsdelivr CDN
+(about 3 MB gzipped, for the LSTM model the default engine mode uses) and caches
+it in the process working directory. That request
+carries no identity data and no image, but it is a network call, and **on a
+machine with no internet access the first OCR run fails**.
+
+To remove it, give the engine a local copy of the model. Download
+`eng.traineddata` once (3.9 MB from
+[tessdata_fast](https://github.com/tesseract-ocr/tessdata_fast/raw/main/eng.traineddata)),
+put it in a directory, and name that directory as the cache:
+
+```js
+import { ocr } from '@sierrafy/sdk';
+
+const result = await ocr(imageBuffer, {
+  tesseract: { cachePath: '/opt/tessdata' }, // holds eng.traineddata
+});
+```
+
+Or set it once for the process, which is usually what you want in a container:
+
+| Variable | Effect |
+|---|---|
+| `TESSERACT_CACHE_PATH` | Directory the model is read from before any download, and written to after one. Put a plain `eng.traineddata` here and nothing is ever fetched. |
+| `TESSERACT_LANG_PATH` | Where the model is loaded from on a cache miss: a URL (your own mirror), or a local directory. |
+
+```bash
+TESSERACT_CACHE_PATH=/opt/tessdata node app.js
+```
+
+An explicit option beats the environment variable, which beats the CDN default.
+
+:::note The two paths want different filenames
+
+`cachePath` reads **`eng.traineddata`**, plain and uncompressed. That is the file
+you get from tessdata_fast, so this route is copy-and-go.
+
+`langPath` pointed at a local directory reads **`eng.traineddata.gz`**, because
+`tesseract.js` appends `.gz` by default. Point `langPath` at a directory holding
+an uncompressed file and it fails with `ENOENT` on the `.gz` name. Use
+`cachePath` for a plain file, and `langPath` for a URL or a gzipped copy.
+
+:::
+
+With `cachePath` set to a directory that holds the model, the OCR path is
+genuinely offline and works air-gapped. If you are building a Docker image,
+copying `eng.traineddata` in and setting `TESSERACT_CACHE_PATH` is the whole job.
+
+## Sending data off the machine
+
+Setting `OCR_ENGINE=google-vision` with a `GOOGLE_VISION_KEY` routes to Google
+Cloud Vision, which is markedly more accurate and is **the only code path in
+Sierrafy that sends identity data anywhere**. Card images, including the
+portrait, leave your infrastructure and leave Sierra Leone. It is off unless you
+turn it on. See [Privacy](./privacy.md) for what enabling it commits you to.
 
 ## Zone maps
 

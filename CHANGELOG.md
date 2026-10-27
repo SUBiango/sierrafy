@@ -12,6 +12,8 @@ scaffold and is marked private.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-27
+
 ### Added
 
 - **Published project policies**, in the repository root and on the docs site:
@@ -24,6 +26,33 @@ scaffold and is marked private.
   2.1 with a named enforcement contact).
 - **Issue templates** that require confirming no real identity data is attached,
   and route vulnerabilities to private advisories instead of public issues.
+
+### Added
+
+- **`cachePath` and `langPath` on the Tesseract engine**, as
+  `ocr(image, { tesseract: { cachePath } })`, `createTesseractEngine({ ... })`,
+  or the `TESSERACT_CACHE_PATH` and `TESSERACT_LANG_PATH` environment variables.
+  Point `cachePath` at a directory holding a plain `eng.traineddata` and OCR
+  runs with no network access at all, which is verified end to end against the
+  real model file. An explicit option beats the environment variable, which
+  beats the `tesseract.js` CDN default. Note that a local `langPath` wants
+  `eng.traineddata.gz`, because `tesseract.js` appends `.gz` there; that is why
+  `cachePath` is the documented route for a plain file.
+
+### Fixed
+
+- **Corrected an overstated offline claim.** The docs, the README and `0.1.0`'s
+  changelog entry said the default engine makes no outbound network call. It
+  does make one: `tesseract.js` does not bundle `eng.traineddata`, so the first
+  `ocr()` call downloads the model from the jsdelivr CDN and caches it. No
+  identity data is transmitted by that request, and it is still a network call,
+  and it fails on a machine with no internet, so "fully offline-capable" without
+  qualification was not true of a fresh install. The wording now separates the
+  unconditional claim (no identity data is transmitted on the default path) from
+  the conditional one (no network call, once the model is local), and the new
+  `langPath` / `cachePath` options are what make the conditional claim
+  achievable. The engine's own doc comment claiming "bundled traineddata" was
+  wrong too and is fixed.
 
 ### Changed
 
@@ -62,8 +91,9 @@ First release. Two of the five verification layers are usable.
   bundled with the package under CC0. It includes the document number and expiry
   zones the NFC layer will need.
 - **Optional Google Vision OCR engine**, behind `OCR_ENGINE=google-vision` and
-  `GOOGLE_VISION_KEY`. This is the only outbound network call in the package and
-  it is off by default.
+  `GOOGLE_VISION_KEY`. This is the only path in the package that transmits
+  identity data and it is off by default. (This entry originally said "the only
+  outbound network call in the package", which was wrong; see Unreleased.)
 
 ### Known limitations
 
@@ -89,5 +119,6 @@ First release. Two of the five verification layers are usable.
 - Published from CI with npm provenance, so the tarball can be traced to the
   commit and workflow that built it.
 
-[Unreleased]: https://github.com/SUBiango/sierrafy/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/SUBiango/sierrafy/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/SUBiango/sierrafy/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/SUBiango/sierrafy/releases/tag/v0.1.0

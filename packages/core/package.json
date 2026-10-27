@@ -1,6 +1,6 @@
 {
   "name": "@sierrafy/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Sierrafy core SDK: NIN validator, OCR, and fraud checks (Phase 1).",
   "license": "MIT",
   "repository": {

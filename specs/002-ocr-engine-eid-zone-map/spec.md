@@ -141,6 +141,17 @@ surfaced at engine init (not an OCR result error).
 5. **Engine selection / offline.** With `OCR_ENGINE=tesseract` (default) a call
    makes **no outbound request** (asserted); with `OCR_ENGINE=google-vision` the
    call routes to the Vision path (test with the network call **mocked**).
+
+   > **Correction, October 2026.** This criterion was wrong as written, and the
+   > test that satisfied it only ever asserted that *engine resolution* makes no
+   > request, which is a weaker claim. `tesseract.js` does not bundle
+   > `eng.traineddata`, so the first real `recognize()` fetches the language
+   > model from the jsdelivr CDN. No identity data is transmitted, and it is
+   > still a network call. The engine now takes `langPath` / `cachePath` (and
+   > `TESSERACT_LANG_PATH` / `TESSERACT_CACHE_PATH`), and with a local model the
+   > criterion holds literally. Read it as: the default transmits **no identity
+   > data** unconditionally, and makes **no network call** once the model is
+   > local.
 6. **Error paths.** An unreadable fixture → `IMAGE_UNREADABLE`; an unsupported
    document → `DOCUMENT_UNSUPPORTED` (no throw).
 7. **Coverage** on the OCR module ≥ 90%; **no real NIN/PII values** in committed

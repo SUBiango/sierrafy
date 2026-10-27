@@ -95,9 +95,20 @@ them.
 - **No biometric data is ever persisted.** Face images and embeddings are
   processed in memory and discarded once a match score is produced. This is a
   privacy-by-design rule.
-- **Phase 1 is fully offline-capable.** No outbound network calls, unless the
-  developer explicitly opts into the Google Vision OCR engine. That engine is the
-  single egress path in the whole system, and it is off by default.
+- **No identity data leaves the machine** unless the developer explicitly opts
+  into the Google Vision OCR engine. That engine is the single path in the whole
+  system that transmits identity data, and it is off by default.
+- **Phase 1 is offline-capable, and say so precisely.** The claim used to be
+  written as "no outbound network calls", which was wrong: `tesseract.js` does
+  not bundle `eng.traineddata`, so the first OCR run fetches it from the jsdelivr
+  CDN. That request carries no personal data, and it is still a network call, and
+  it still fails on an air-gapped machine. The engine accepts `cachePath` and
+  `langPath` (and `TESSERACT_CACHE_PATH` / `TESSERACT_LANG_PATH`) so a local
+  model makes the offline claim literally true. `cachePath` holds a plain
+  `eng.traineddata`; a local `langPath` wants `eng.traineddata.gz`, since
+  `tesseract.js` appends `.gz` there. When you write about this,
+  distinguish "transmits no identity data", which is unconditional, from "makes
+  no network call", which holds only once the model is local.
 - **NFC passive authentication degrades, it does not fail.** It depends on the
   NCRA CSCA root certificate, which has not been obtained. Until it is, NFC reads
   return `passive_auth_passed: null` with a `CSCA_UNAVAILABLE` flag rather than

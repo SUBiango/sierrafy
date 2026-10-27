@@ -5,13 +5,15 @@ const recognizeMock = jest.fn();
 const terminateMock = jest.fn();
 const setParametersMock = jest.fn();
 
+const createWorkerMock = jest.fn(async () => ({
+  recognize: recognizeMock,
+  terminate: terminateMock,
+  setParameters: setParametersMock,
+}));
+
 jest.mock('tesseract.js', () => ({
   PSM: { SINGLE_LINE: '7' },
-  createWorker: jest.fn(async () => ({
-    recognize: recognizeMock,
-    terminate: terminateMock,
-    setParameters: setParametersMock,
-  })),
+  createWorker: createWorkerMock,
 }));
 
 jest.mock('sharp', () => {
@@ -86,5 +88,98 @@ describe('tesseract engine — recognizeZones', () => {
     );
     expect(result).toEqual({ zones: {}, confidence: 0 });
     expect(recognizeMock).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * The language model is the one thing that can reach the network on the
+ * default engine, so the paths that stop it are worth pinning. Without
+ * `langPath` or `cachePath`, tesseract.js resolves the model from the jsdelivr
+ * CDN; with either, it reads a local copy and the run is genuinely offline.
+ */
+describe('tesseract engine — language model paths (offline guarantee)', () => {
+  const envKeys = ['TESSERACT_LANG_PATH', 'TESSERACT_CACHE_PATH'] as const;
+  const saved: Record<string, string | undefined> = {};
+
+  beforeEach(() => {
+    for (const k of envKeys) {
+      saved[k] = process.env[k];
+      delete process.env[k];
+    }
+    recognizeMock.mockResolvedValue({
+      data: { text: 'ABCD1234', confidence: 80 },
+    });
+  });
+
+  afterEach(() => {
+    for (const k of envKeys) {
+      if (saved[k] === undefined) delete process.env[k];
+      else process.env[k] = saved[k];
+    }
+  });
+
+  /**
+   * The third argument to `createWorker` is the worker options object. The mock
+   * is declared without parameters, so its recorded calls type as an empty
+   * tuple; widen before indexing.
+   */
+  function workerOptions(): Record<string, unknown> {
+    const calls = createWorkerMock.mock.calls as unknown as unknown[][];
+    return (calls[0]?.[2] ?? {}) as Record<string, unknown>;
+  }
+
+  it('sets no paths by default, leaving tesseract.js to its own defaults', async () => {
+    await createTesseractEngine().recognize(Buffer.from('img'), zoneMap);
+
+    // Omitted rather than undefined: createWorker spreads these over its own
+    // defaults, so an explicit undefined would wipe them.
+    expect(workerOptions()).toEqual({});
+    expect('langPath' in workerOptions()).toBe(false);
+    expect('cachePath' in workerOptions()).toBe(false);
+  });
+
+  it('passes an explicit langPath and cachePath through to the worker', async () => {
+    await createTesseractEngine({
+      langPath: '/opt/tessdata',
+      cachePath: '/var/cache/sierrafy',
+    }).recognize(Buffer.from('img'), zoneMap);
+
+    expect(workerOptions()).toEqual({
+      langPath: '/opt/tessdata',
+      cachePath: '/var/cache/sierrafy',
+    });
+  });
+
+  it('falls back to the env vars when no option is given', async () => {
+    process.env.TESSERACT_LANG_PATH = '/env/tessdata';
+    process.env.TESSERACT_CACHE_PATH = '/env/cache';
+
+    await createTesseractEngine().recognize(Buffer.from('img'), zoneMap);
+
+    expect(workerOptions()).toEqual({
+      langPath: '/env/tessdata',
+      cachePath: '/env/cache',
+    });
+  });
+
+  it('prefers the explicit option over the env var', async () => {
+    process.env.TESSERACT_LANG_PATH = '/env/tessdata';
+
+    await createTesseractEngine({ langPath: '/explicit/tessdata' }).recognize(
+      Buffer.from('img'),
+      zoneMap,
+    );
+
+    expect(workerOptions().langPath).toBe('/explicit/tessdata');
+  });
+
+  it('resolves the paths once per engine, not once per zone', async () => {
+    process.env.TESSERACT_LANG_PATH = '/env/tessdata';
+    const engine = createTesseractEngine();
+    process.env.TESSERACT_LANG_PATH = '/changed/after/construction';
+
+    await engine.recognize(Buffer.from('img'), zoneMap);
+
+    expect(workerOptions().langPath).toBe('/env/tessdata');
   });
 });
