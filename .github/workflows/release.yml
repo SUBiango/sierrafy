@@ -11,12 +11,22 @@ permissions:
   contents: read
 
 jobs:
-  publish:
-    name: Publish @sierrafy/sdk
+  # Everything that touches dependency code runs here, with no elevated
+  # permissions and nothing worth stealing. `pnpm install` executes the
+  # postinstall scripts of the whole dev tree, and every third-party action in
+  # this job shares a runner with them, so this is where that surface belongs.
+  #
+  # It ends by packing the tarball and handing it to `publish` as an artifact.
+  # That is the point of the split: the bytes that were smoke-tested are the
+  # bytes that get published. Before, `npm stage publish` re-ran
+  # `prepublishOnly` in the credentialed job and packed a *fresh* tarball, so the
+  # artifact that was tested and the artifact that shipped were never the same
+  # file.
+  gates:
+    name: Gates and tarball
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # create the GitHub Release
-      id-token: write # npm provenance (OIDC)
+    outputs:
+      tarball: ${{ steps.pack.outputs.tarball }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -87,12 +97,24 @@ jobs:
             exit 1
           fi
 
+      # Pack once, here, and use this exact file for the smoke test and for the
+      # publish. Packing again later would produce a different artifact from the
+      # one that was tested.
+      - name: Pack the tarball
+        id: pack
+        working-directory: packages/core
+        run: |
+          TARBALL="$(npm pack --silent | tail -1)"
+          echo "tarball=$TARBALL" >> "$GITHUB_OUTPUT"
+          echo "packed $TARBALL"
+
       # Installs the built tarball into an empty project with no native deps, the
       # way a consumer would. The monorepo layout hides packaging bugs; this does
       # not. See RELEASING.md step 4.
       - name: Smoke-test the tarball as a consumer would
+        env:
+          TARBALL: ${{ steps.pack.outputs.tarball }}
         run: |
-          TARBALL="$(cd packages/core && npm pack --silent | tail -1)"
           mkdir -p /tmp/consumer && cd /tmp/consumer && npm init -y >/dev/null
           npm install --no-audit --no-fund "$GITHUB_WORKSPACE/packages/core/$TARBALL"
           node -e "
@@ -113,6 +135,41 @@ jobs:
                 console.log('ocr fails with a clear message, as intended');
               });
           "
+
+      - name: Hand the tarball to the publish job
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: tarball
+          path: packages/core/${{ steps.pack.outputs.tarball }}
+          if-no-files-found: error
+          retention-days: 7
+
+  # The only job that can publish or write to the repository. It installs
+  # nothing, builds nothing and checks out nothing, so no dependency postinstall
+  # script and no project code runs beside the OIDC credential. Two first-party
+  # actions, both pinned.
+  #
+  # It publishes the artifact `gates` built. Because a tarball is handed to npm
+  # rather than a directory, `prepublishOnly` and `prepack` do not run here,
+  # which is what keeps this job free of a toolchain.
+  publish:
+    name: Stage @sierrafy/sdk on npm
+    needs: gates
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the GitHub Release
+      id-token: write # npm provenance (OIDC)
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: tarball
+
+      # Node 24 for npm 11.19.1. See the note in `gates`: trusted publishing
+      # needs npm 11.5.1+ and staged publishing needs 11.15.0+, and Node 22
+      # ships 10.9.9. No registry-url, for the same reason as there.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
 
       # Node version does not guarantee npm version, and the failure mode for a
       # too-old npm is "stage is not a command", which reads like a typo. Fail
@@ -138,14 +195,19 @@ jobs:
       # The trusted publisher for this package is configured stage-only, so even
       # a fully compromised run cannot publish directly, only queue something a
       # human can reject.
+      #
       # No token. The package has a trusted publisher for this repository and
       # workflow, so npm authenticates the stage with the OIDC credential minted
-      # from `id-token: write`. Provenance is generated automatically for a
-      # public package from a public repository, so NPM_CONFIG_PROVENANCE is
-      # redundant too.
+      # from `id-token: write`.
+      #
+      # `--provenance` is explicit rather than left to npm's auto-detection,
+      # which is what the directory publish relied on. Asking for it means npm
+      # fails the release if it cannot generate an attestation, instead of
+      # quietly staging a version without one.
       - name: Stage the release on npm
-        working-directory: packages/core
-        run: npm stage publish --access public
+        env:
+          TARBALL: ${{ needs.gates.outputs.tarball }}
+        run: npm stage publish "./$TARBALL" --access public --provenance
 
       - name: Say what to do next
         run: |
