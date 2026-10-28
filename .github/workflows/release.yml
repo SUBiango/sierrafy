@@ -151,10 +151,18 @@ jobs:
         run: |
           echo "::notice::Staged for approval. Run 'npm stage list @sierrafy/sdk',"\
                "inspect with 'npm stage view <id>', then 'npm stage approve <id>'."\
-               "The draft GitHub Release stays a draft until you do."
+               "The GitHub Release stays a draft until you do. Publish it with"\
+               "'gh release edit $GITHUB_REF_NAME --draft=false', and write real"\
+               "notes first if the release deserves more than a changelog link."
 
       # Draft, because the version is staged rather than published. Publish the
       # release after approving the stage, so GitHub and npm agree.
+      #
+      # The body deliberately carries no note about being a draft or awaiting
+      # approval. v0.1.1 shipped with one, and once the release was published the
+      # page sat there telling readers it was still a draft. Anything true only
+      # while the release is staged belongs in the step above, which reaches the
+      # maintainer, not on a public page that outlives the condition.
       - name: Create a draft GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -166,8 +174,4 @@ jobs:
 
           \`\`\`sh
           npm install @sierrafy/sdk
-          \`\`\`
-
-          _This release is a draft because the npm version is staged awaiting
-          approval. Run \`npm stage approve <stage-id>\` and then publish this
-          release._"
+          \`\`\`"
