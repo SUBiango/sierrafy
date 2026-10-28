@@ -16,6 +16,16 @@ scaffold and is marked private.
 
 ### Added
 
+- **`cachePath` and `langPath` on the Tesseract engine**, as
+  `ocr(image, { tesseract: { cachePath } })`, `createTesseractEngine({ ... })`,
+  or the `TESSERACT_CACHE_PATH` and `TESSERACT_LANG_PATH` environment variables.
+  Point `cachePath` at a directory holding a plain `eng.traineddata` and OCR
+  runs with no network access at all, which is verified end to end against the
+  real model file. An explicit option beats the environment variable, which
+  beats the `tesseract.js` CDN default. Note that a local `langPath` wants
+  `eng.traineddata.gz`, because `tesseract.js` appends `.gz` there; that is why
+  `cachePath` is the documented route for a plain file.
+
 - **Published project policies**, in the repository root and on the docs site:
   `PRIVACY.md` (what the SDK processes, what it never stores, the single
   Google Vision egress path, and the laws the design targets, mirrored at
@@ -26,18 +36,6 @@ scaffold and is marked private.
   2.1 with a named enforcement contact).
 - **Issue templates** that require confirming no real identity data is attached,
   and route vulnerabilities to private advisories instead of public issues.
-
-### Added
-
-- **`cachePath` and `langPath` on the Tesseract engine**, as
-  `ocr(image, { tesseract: { cachePath } })`, `createTesseractEngine({ ... })`,
-  or the `TESSERACT_CACHE_PATH` and `TESSERACT_LANG_PATH` environment variables.
-  Point `cachePath` at a directory holding a plain `eng.traineddata` and OCR
-  runs with no network access at all, which is verified end to end against the
-  real model file. An explicit option beats the environment variable, which
-  beats the `tesseract.js` CDN default. Note that a local `langPath` wants
-  `eng.traineddata.gz`, because `tesseract.js` appends `.gz` there; that is why
-  `cachePath` is the documented route for a plain file.
 
 ### Fixed
 
