@@ -43,29 +43,39 @@ it through
 ## What the SDK stores
 
 Nothing about a person. The only file the package writes is the Tesseract
-language model that `tesseract.js` downloads on first use and caches. There is
-no state directory, no cache of results, and no runtime configuration file.
+language model: on the first OCR run `tesseract.js` fetches `eng.traineddata`
+from the jsdelivr CDN and caches it, by default in the process working
+directory. It is the same model for every Tesseract user anywhere, and nothing
+about the person being verified is sent to fetch it. `TESSERACT_CACHE_PATH`
+controls where it lands, and if that directory already holds `eng.traineddata`
+nothing is downloaded at all. There is no state directory, no cache of results,
+and no runtime configuration file.
 
 ## No telemetry, offline by default
 
 - **No telemetry.** No usage reporting, no error reporting, no version pings, no
   analytics, to anyone, including the maintainer. There is no code in the package
   that could.
-- **The default path makes no network call.** NIN validation is pure
-  computation. OCR with the default Tesseract engine runs locally once its
-  language model is present.
-- **Phase 1 is built to work with no internet connection**, which is both a
-  deployment requirement for Sierra Leone and the thing that makes the privacy
-  promise easy to verify.
+- **No identity data is transmitted on the default path.** NIN validation is
+  pure computation. OCR with the default Tesseract engine recognises locally on
+  WebAssembly, and no image, NIN or extracted field is sent anywhere.
+- **One non-identity network call, once.** The language model is not bundled, so
+  the first OCR run fetches `eng.traineddata` from the jsdelivr CDN. It carries
+  no personal data, and it is still a network call: with no internet, the first
+  OCR run fails until the model is supplied locally.
+- **Phase 1 is built to work with no internet connection**, and a local model
+  is what delivers it. See [Staying offline](./ocr.md#staying-offline) for the
+  one-time setup that makes the OCR path air-gapped.
 
 ## The one exception: Google Cloud Vision
 
 Setting `OCR_ENGINE=google-vision` sends **the ID card image, including the
-portrait, to Google Cloud Vision**. It is the only outbound call in the package,
-and it is off unless you turn it on.
+portrait, to Google Cloud Vision**. It is the only path that sends identity data
+anywhere, and it is off unless you turn it on.
 
 - The image leaves your infrastructure and leaves Sierra Leone, and is processed
-  under Google's terms, not under this statement.
+  under Google's terms, not under this statement. This is the only path in the
+  package that transmits identity data.
 - You become the party disclosing personal data to a third-party processor
   abroad. The consent, contract, and cross-border transfer basis for that are
   yours to arrange.

@@ -10,6 +10,38 @@ export type DocumentType = 'SL_NATIONAL_EID' | 'SL_PASSPORT';
 /** Which OCR backend to use. `tesseract` is offline and the default. */
 export type OcrEngineName = 'tesseract' | 'google-vision';
 
+/**
+ * Options for the default Tesseract engine.
+ *
+ * Tesseract.js needs an `eng.traineddata` language model, which is not bundled
+ * in this package. It reads `cachePath` first and, on a miss, downloads the
+ * model from the jsdelivr CDN: one outbound request on first use, carrying no
+ * identity data and no image. Set `langPath` to a local directory, or pre-place
+ * the model in `cachePath`, and nothing is downloaded at all. That is what
+ * makes a genuinely offline or air-gapped deployment possible.
+ */
+export interface TesseractEngineOptions {
+  /**
+   * Where the model is loaded from on a cache miss: a URL (your own mirror) or
+   * a local directory. Defaults to `TESSERACT_LANG_PATH`, else the jsdelivr CDN
+   * that `tesseract.js` falls back to.
+   *
+   * A local directory must hold **`eng.traineddata.gz`**, gzipped, because
+   * `tesseract.js` appends `.gz` by default. For a plain, uncompressed model
+   * file use {@link TesseractEngineOptions.cachePath} instead, which is the
+   * simpler route to an offline deployment.
+   */
+  langPath?: string;
+  /**
+   * Directory the model is read from before any download is attempted, and
+   * written to after one. Holds **`eng.traineddata`**, plain and uncompressed,
+   * which is the file `tessdata_fast` publishes. Defaults to
+   * `TESSERACT_CACHE_PATH`, else `tesseract.js`'s own default of the process
+   * working directory.
+   */
+  cachePath?: string;
+}
+
 /** Error reported on the OCR result (mirrors M1's error-as-field pattern). */
 export type OcrErrorCode = 'IMAGE_UNREADABLE' | 'DOCUMENT_UNSUPPORTED';
 

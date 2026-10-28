@@ -40,9 +40,12 @@ breaks it, that is a security issue:
 Nothing about a person. The package writes exactly two kinds of file, neither of
 which touches identity data:
 
-- **OCR language models.** `tesseract.js` downloads its trained data on first
-  use and caches it. These are language models, the same for every user of
-  Tesseract anywhere.
+- **OCR language models.** On the first OCR run `tesseract.js` downloads
+  `eng.traineddata` from the jsdelivr CDN and caches it, by default in the
+  process working directory. It is a language model, identical for every user of
+  Tesseract anywhere, and nothing about the person being verified is sent to
+  fetch it. Set `TESSERACT_CACHE_PATH` to control where it lands, and if that
+  directory already holds `eng.traineddata` nothing is downloaded at all.
 - **Nothing else.** There is no state directory, no cache of results, and no
   configuration written at runtime.
 
@@ -51,13 +54,20 @@ which touches identity data:
 - **There is no telemetry.** The SDK reports no usage, no errors, no version
   pings, and no analytics to anyone, including to the maintainer. There is no
   code in the package that could.
-- **The default path makes no network call at all.** NIN validation is pure
-  computation. OCR with the default Tesseract engine runs locally, once its
-  language model is present.
-- **Phase 1 is designed to work with no internet connection.** That is a
-  deliberate constraint for deployment in Sierra Leone, where connectivity is
-  not a given, and it is also what makes the privacy promise easy to verify: a
-  process that cannot reach the network cannot leak to it.
+- **No identity data is transmitted on the default path.** NIN validation is
+  pure computation. OCR with the default Tesseract engine recognises locally, on
+  WebAssembly, and no image, NIN or extracted field is sent anywhere.
+- **One non-identity network call, once.** The Tesseract language model is not
+  bundled in the package, so the first OCR run fetches `eng.traineddata` from
+  the jsdelivr CDN and caches it. That request contains no personal data of any
+  kind, and it is still a network call: on a machine with no internet, the first
+  OCR run fails until the model is supplied locally.
+- **Phase 1 is designed to work with no internet connection**, and pre-placing
+  the model in `TESSERACT_CACHE_PATH` is what delivers that: with a local model,
+  the whole OCR path is air-gapped.
+  Connectivity is not a given in Sierra Leone, and a process that cannot reach
+  the network cannot leak to it, which is also what makes this promise easy to
+  verify rather than merely asserted.
 
 ## The one exception: Google Cloud Vision
 
@@ -74,8 +84,9 @@ recognition.** That means:
 - You, not Sierrafy, become the party disclosing personal data to a third-party
   processor outside the country. Whatever consent, contract, and cross-border
   transfer basis that requires is yours to put in place.
-- It is the only outbound call in the package. `OCR_ENGINE=tesseract`, the
-  default, has none.
+- **It is the only path in the package that transmits identity data.** The
+  default, `OCR_ENGINE=tesseract`, transmits none: its one network call fetches
+  a language model and can be removed entirely with a local model.
 
 The honest recommendation: leave it off for production identity verification
 unless you have specifically decided, and documented, that you can send card

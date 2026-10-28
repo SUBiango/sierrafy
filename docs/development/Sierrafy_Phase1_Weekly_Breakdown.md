@@ -51,7 +51,7 @@ Tasks:
 - Build `SL_NATIONAL_EID.json` zone map (relative coordinates). Include the **document-number and expiry-date zones** the eID chip's BAC key derivation needs in Week 14 — not just NIN/name/DOB/photo — so the eID has its own BAC inputs the way the passport does (see Week 5–6).
 - Implement cross-check: exact NIN match, fuzzy name (Levenshtein ≥85%), normalised DOB.
 - Build `/v1/ocr` endpoint returning `extracted` + `ocr_confidence`.
-- Wire the optional Google Vision OCR engine behind `OCR_ENGINE=google-vision` + `GOOGLE_VISION_KEY` (§4.2.2, §7.2); default stays `tesseract` with zero outbound calls. This is the only egress path the Week 17–18 offline-guarantee test toggles.
+- Wire the optional Google Vision OCR engine behind `OCR_ENGINE=google-vision` + `GOOGLE_VISION_KEY` (§4.2.2, §7.2); default stays `tesseract`, which transmits no identity data. It is the only path that does, and the one the Week 17–18 offline-guarantee test toggles. Note the default is not call-free: `tesseract.js` fetches `eng.traineddata` from a CDN unless `TESSERACT_CACHE_PATH` names a directory that already holds it.
 
 **Testable deliverables:**
 - On a labelled set of ≥10 eID sample images, NIN field extracted correctly in ≥80% of cases (record the metric).
@@ -59,7 +59,7 @@ Tasks:
 - Fuzzy name match passes for "AMINATA KAMARA" vs "Aminata Kamara" and fails below threshold.
 - DOB normaliser converts `17/04/1992` → `1992-04-17` (unit test).
 - eID zone map exposes document number + expiry alongside NIN/name/DOB (unit test), confirming the eID's BAC-key inputs are available before Week 14.
-- With `OCR_ENGINE=tesseract` (default) a request makes no outbound call; setting `OCR_ENGINE=google-vision` routes to the Vision path (test with the call mocked).
+- With `OCR_ENGINE=tesseract` (default) a request transmits no identity data, and with `TESSERACT_CACHE_PATH` set to a directory holding `eng.traineddata` it makes no outbound call at all; setting `OCR_ENGINE=google-vision` routes to the Vision path (test with the call mocked).
 
 > **Dependency:** ≥10 high-res eID samples sourced before this week (Open Question #2).
 
@@ -242,7 +242,7 @@ Tasks:
 
 Tasks:
 - Finalise README, Docusaurus docs site (incl. NFC mobile-SDK guides and the passive-auth/CSCA-pending caveat), `docker-compose.yml`, `.env.example` (incl. `NCRA_CSCA_CERT_PATH`, `NFC_PASSIVE_AUTH_REQUIRED`).
-- Verify full offline operation (no outbound calls unless Google Vision opt-in).
+- Verify full offline operation on a container with **no network access at all**, not merely with Google Vision disabled. That requires `eng.traineddata` baked into the image and `TESSERACT_CACHE_PATH` pointing at it (§7.2, §7.3); without it the first OCR call fails on a CDN fetch rather than running locally.
 - Tag `v1.0.0`, publish all five SDK packages, push docs.
 
 **Testable deliverables:**

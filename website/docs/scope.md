@@ -47,12 +47,18 @@ yourself if you have better information, and please
 
 No biometric data is persisted anywhere, by design rather than by configuration.
 Face images and embeddings are processed in memory and discarded once a score is
-produced. There is no telemetry, and the default OCR engine makes no outbound
-network call.
+produced. There is no telemetry, and the default OCR engine sends no identity
+data anywhere: it recognises locally.
 
 The one exception is opt-in and explicit: setting `OCR_ENGINE=google-vision`
-sends card images to Google Cloud Vision. That is the only egress path in the
-system.
+sends card images to Google Cloud Vision. That is the only path that carries
+identity data off the machine.
+
+The default engine does make one non-identity network call, once, to fetch the
+Tesseract language model, which is not bundled in the package. It carries no
+personal data, and
+[Staying offline](./ocr.md#staying-offline) covers the one-time setup that
+removes it so OCR runs air-gapped.
 
 [Privacy](./privacy.md) is the full statement: every field the SDK touches, what
 it never stores, the laws it is designed to align with, and the obligations that
