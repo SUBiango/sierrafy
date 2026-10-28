@@ -106,8 +106,20 @@ npm stage approve <stage-id>   # prompts for 2FA
 ```
 
 Then publish the draft GitHub Release the workflow created, so GitHub and npm
-agree. Nothing is installable before this step: for a package that did not exist,
-npm shows only a `0.0.0-stage` placeholder.
+agree:
+
+```sh
+gh release edit vX.Y.Z --draft=false
+```
+
+The workflow's generated body is a changelog link and an install line, nothing
+more. Write real notes before publishing if the release earns them, which it does
+whenever a consumer has to do something: a behaviour change, a dependency floor
+that will produce a peer warning, a new option they would otherwise not find.
+`gh release edit vX.Y.Z --notes "..."` replaces the body.
+
+Nothing is installable before the stage is approved: for a package that did not
+exist, npm shows only a `0.0.0-stage` placeholder.
 
 This is deliberate. See
 [docs/development/supply-chain.md](docs/development/supply-chain.md): provenance
