@@ -4,6 +4,14 @@ on:
   push:
   pull_request:
 
+# Least privilege, explicitly. CI runs third-party actions on mutable major tags
+# and needs nothing but the source, so a compromised action here can waste a
+# build and no more. `release.yml` is the job that holds credentials; it pins its
+# actions to SHAs and elevates only where it must. See
+# docs/development/supply-chain.md.
+permissions:
+  contents: read
+
 jobs:
   node:
     name: Node (lint + build + test)
