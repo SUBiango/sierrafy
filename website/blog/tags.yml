@@ -1,0 +1,38 @@
+# Declared build log tags. `onInlineTags: 'throw'` in docusaurus.config.ts means
+# an entry can only use a tag defined here, which keeps the tag list a short
+# index of the project's layers and concerns rather than free text.
+
+build-log:
+  label: Build log
+  permalink: /build-log
+  description: Every entry in the build log, newest first.
+
+validator:
+  label: NIN validator
+  permalink: /validator
+  description: The M1 NIN format validator and the provisional format itself.
+
+ocr:
+  label: OCR
+  permalink: /ocr
+  description: The M2 document OCR engine and the eID zone map.
+
+spec:
+  label: Spec
+  permalink: /spec
+  description: Decisions taken in the architecture spec, usually before code.
+
+security:
+  label: Security
+  permalink: /security
+  description: Threat modelling, key handling, and what an attacker could do.
+
+privacy:
+  label: Privacy
+  permalink: /privacy
+  description: What Sierrafy processes, what it stores, and what it never sends.
+
+testing:
+  label: Testing
+  permalink: /testing
+  description: Tests that caught something, and tests that only looked like they did.
