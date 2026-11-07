@@ -2,7 +2,7 @@
 
 **Research brief · 25 October 2026**
 Prepared for Umaru S. Biango · Sierrafy (sierrafy.dev)
-Evidence checked against: npm `@sierrafy/sdk@0.1.0`, docs.sierrafy.dev, sierrafy.dev, github.com/SUBiango/sierrafy, DPG Standard repo (DPGAlliance), MoCTI, UNICEF and press sources listed at the end.
+Evidence checked against: npm `@sierrafy/sdk@0.1.1` (`0.1.0` at the time of writing), docs.sierrafy.dev, sierrafy.dev, github.com/SUBiango/sierrafy, DPG Standard repo (DPGAlliance), MoCTI, UNICEF and press sources listed at the end.
 
 > **Implementation status, 26 October 2026.** Everything in Part 6 steps 1 and 2 is done in the repository: the four policy documents, the README ownership section, the issue templates, the docs Privacy page, and all six spec edits. Indicators 7, 9A, 9B and 9C now have evidence to point at, and nothing in the mapping below is still blocking submission. The items still outstanding are the ones that need someone else: the registry application itself (step 3), the two emails (step 4), contributors (step 5), and a pilot letter (step 6). Per-item notes are marked **Done** inline.
 
@@ -68,7 +68,8 @@ These follow from the programme's own stated stages and criteria:
 - **Regulator name.** ✅ Done. The spec said "NATCOM"; MoCTI now refers to the regulator as the **National Communications Authority (NatCA)**. Renamed in spec §4.3.4 and §12.5 and in the weekly breakdown, with one sentence retained to explain the rename. `CONTRIBUTING.md` records the naming rule.
 - **Data protection law status.** ✅ Done in the repository; still to apply in your application prose. There's still no data protection law in force. Cabinet approved a National Data Protection Policy and a new Data Protection and Right to Access Information Act on 21 April 2026; the bill had not been enacted as of 21 October 2026. Say "designed for" the bill, not "compliant with" it. Spec §4.3.4 and §9.3 and `PRIVACY.md` now use that wording, and `CONTRIBUTING.md` pins it.
 - **Pricing lines.** ✅ Done. Deleted from spec §2.1 and §12.3. The gap framing is kept: NCRA built the foundation; Sierrafy is the developer layer above it.
-- **Proof points to add.** `@sierrafy/sdk@0.1.0` published 22 October 2026 with npm provenance (SLSA v1 attestation); docs at docs.sierrafy.dev; OCR zone map calibrated on 10 real cards with no PII committed; your DPG Registry application ID once you have it.
+- **Proof points to add.** `@sierrafy/sdk@0.1.1` published 27 October 2026 with npm provenance (SLSA v1 attestation) and a [published release page](https://github.com/SUBiango/sierrafy/releases/tag/v0.1.1), superseding `0.1.0` of 22 October; docs at docs.sierrafy.dev, including a Privacy page; the four published policies (`PRIVACY.md`, `SECURITY.md`, `RESPONSIBLE_USE.md`, `CODE_OF_CONDUCT.md`); OCR zone map calibrated on 10 real cards with no PII committed; your DPG Registry application ID once you have it.
+- **A proof point that is better than a claim of good practice.** `0.1.1` exists because a review found the SDK's "fully offline-capable" claim was overstated: `tesseract.js` downloads its language model from a CDN on first use, so a fresh install on an offline machine failed. The fix shipped the capability (`cachePath` / `langPath`) rather than only softening the wording, and the changelog says plainly what was wrong. The same release raised `sharp` to `^0.35.5` for two high-severity advisories in the image decoders it bundles, which is the exact attack surface an OCR engine exposes. Reviewers assessing indicators 8 and 9A are reading for whether a maintainer corrects their own claims and patches what processes untrusted input. This is the evidence for both, so cite the release, not just the policies.
 
 ---
 
@@ -144,7 +145,7 @@ Assessment of what existed publicly on 25 October 2026, with the fixes applied o
 | 2 | Open licensing | ✅ Met | `LICENSE` (MIT), `zone-maps/LICENSE` (CC0), npm metadata. Name form reconciled to "Umaru S. Biango" |
 | 3 | Clear ownership | ✅ Met | README **Ownership** section, landing-page footer, `LICENSE` |
 | 4 | Platform independence | ✅ Met | Spec §4.3.2 makes the face model pluggable with Apache-2.0 default weights; §8 licence rows corrected |
-| 5 | Documentation | ✅ Met | docs.sierrafy.dev, README quick start, `CONTRIBUTING.md`, spec, `CHANGELOG.md` (date corrected to 2026-10-22) |
+| 5 | Documentation | ✅ Met | docs.sierrafy.dev, README quick start, `CONTRIBUTING.md`, spec, `CHANGELOG.md` (`0.1.0` date corrected to 2026-10-22; `0.1.1` released 2026-10-27) |
 | 6 | Data extraction | ✅ Met | Format schema, zone maps, results, all open JSON |
 | 7 | Privacy and applicable laws | ✅ Met | `PRIVACY.md` and [docs.sierrafy.dev/privacy](https://docs.sierrafy.dev/privacy), with the laws list |
 | 8 | Standards and best practices | ✅ Met | Part 4, indicator 8 below; CI, npm provenance, `check:pii` |

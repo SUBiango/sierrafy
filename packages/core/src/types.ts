@@ -9,10 +9,7 @@ export type NinCheckName = 'length' | 'charset' | 'checksum' | 'blacklist';
 
 /** Error code reported for the first failing check (see spec precedence). */
 export type NinErrorCode =
-  | 'INVALID_LENGTH'
-  | 'INVALID_CHARSET'
-  | 'INVALID_CHECKSUM'
-  | 'BLACKLISTED';
+  'INVALID_LENGTH' | 'INVALID_CHARSET' | 'INVALID_CHECKSUM' | 'BLACKLISTED';
 
 /**
  * External, editable rule set driving the validator. Loaded from
