@@ -3,10 +3,10 @@ slug: nin-hash-isnt-a-secret
 title: "An 8-character NIN isn't a secret"
 authors: [umaru]
 tags: [build-log, security, privacy, spec]
-date: 2026-11-07T10:00
+date: 2026-10-27T00:30
 ---
 
-**Build log #3 · Spec §4.4.1 · Fixed in the spec before any code shipped**
+**Build log #2 · Spec §4.4.1 · Fixed in the spec before any code shipped**
 
 The architecture spec said the gateway would keep a SHA-256 hash of each NIN for 24 hours to catch duplicate submissions. "Hashed" sounds like "protected". For an 8-character NIN, it isn't. Here's the arithmetic, and what replaced it.
 
@@ -18,7 +18,7 @@ One of Sierrafy's fraud signals is a duplicate-NIN check. If the same NIN shows 
 
 Storing NINs in plain text was obviously wrong. So spec v1.1 said: store `SHA-256(NIN)` instead, and purge it after 24 hours.
 
-The problem was caught while I was reviewing the spec for the DPG Registry application in late October, before any of the fraud-check code (milestone M5) existed.
+The problem was caught while reviewing the spec for the DPG Registry application, before any of the fraud-check code (milestone M5) existed.
 
 ## The number
 

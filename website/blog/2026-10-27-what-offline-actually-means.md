@@ -3,10 +3,10 @@ slug: what-offline-actually-means
 title: "What \"offline\" actually means"
 authors: [umaru]
 tags: [build-log, ocr, privacy, testing]
-date: 2026-11-07T11:00
+date: 2026-10-27T17:00
 ---
 
-**Build log #4 · Document OCR (M2) · Fixed in `@sierrafy/sdk@0.1.1`**
+**Build log #3 · Document OCR (M2) · Fixed in `@sierrafy/sdk@0.1.1`**
 
 Sierrafy's docs said the default OCR engine made no outbound network calls. That was wrong. It never sent identity data anywhere, but it did make one network call, and a test that I thought proved otherwise had been passing all along.
 
@@ -45,7 +45,7 @@ But look at what it actually checked. It spied on `fetch` and called `resolveEng
 
 The test was honest about a smaller claim than the one I was making. A mock can't tell you anything about the network behaviour of the thing it replaces.
 
-It came to light in late October, when I checked every claim in the DPG Registry application against the code rather than against the docs.
+It came to light when I checked every claim in the DPG Registry application against the code rather than against the docs.
 
 ## What else I considered
 

@@ -3,10 +3,10 @@ slug: checksum-stays-off
 title: 'A checksum that would reject real NINs'
 authors: [umaru]
 tags: [build-log, validator, spec, testing]
-date: 2026-11-07T09:00
+date: 2026-09-27
 ---
 
-**Build log #2 · NIN validator (M1) · Shipped disabled in `@sierrafy/sdk@0.1.0`**
+**Build log #1 · NIN validator (M1) · Wired, disabled, and pinned by a test**
 
 The NIN validator has a checksum check. It is implemented, tested, documented,
 and switched off, and it will stay off until NCRA confirms an algorithm. A
@@ -40,7 +40,7 @@ digits. Those two facts do not fit together, and the implementation papered over
 the gap by extracting the digits first and running Luhn on whatever came out.
 
 Here is what that does. The sample cards produced two legible NINs: one all
-letters, one mixing letters and digits. Probed against the shipped validator with
+letters, one mixing letters and digits. Probed against the implementation with
 `checksum.enabled: true`:
 
 | Input | Shape | Result |
@@ -72,8 +72,8 @@ position is the sixth character, not the eighth. The comment described an
 algorithm nobody had implemented, which is how a placeholder starts looking like
 a decision.
 
-Both came out of an implementation review on 2026-09-27, one of ten findings
-against a module small enough to read in a sitting.
+Both came out of today's implementation review of the module: two of ten
+findings against code small enough to read in a sitting.
 
 ## What else I considered
 
@@ -159,9 +159,10 @@ constant, implement it beside Luhn, flip the flag in the schema. The test that
 currently pins the all-letter rejection will fail at that point, which is
 exactly what it is for.
 
-Until then, the honest position is in the release notes: no checksum is
-enforced, and one layer of validation that most ID systems get for free is
-simply absent here.
+Until then the honest position is the one now written into the spec and the
+schema file: no checksum is enforced, and one layer of validation that most ID
+systems get for free is simply absent here. It belongs in the release notes too,
+whenever the first release goes out.
 
 ## The takeaway
 
@@ -179,4 +180,4 @@ why it is off, and leave a test that trips when someone turns it on.
 - [Spec: NIN format validator, §3 design decisions](https://github.com/SUBiango/sierrafy/blob/main/specs/001-nin-format-validator/nin-format-validator.md)
 - [Implementation review, findings 3 and 4](https://github.com/SUBiango/sierrafy/blob/main/specs/001-nin-format-validator/review.md)
 - [Docs: Configuring the format](https://docs.sierrafy.dev/configuring-the-format)
-- [CHANGELOG: 0.1.0 known limitations](https://github.com/SUBiango/sierrafy/blob/main/CHANGELOG.md)
+- [The format schema itself](https://github.com/SUBiango/sierrafy/blob/main/packages/core/src/schema/nin-format.json)
