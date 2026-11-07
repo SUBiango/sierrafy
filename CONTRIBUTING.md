@@ -34,6 +34,7 @@ about NCRA documents and regulations.
 | `csca-certs/` | Where the NCRA CSCA root certificate will live once obtained. |
 | `site/` | The landing page (`sierrafy.dev`). Netlify publishes this directory and nothing else. |
 | `website/` | The Docusaurus documentation site (`docs.sierrafy.dev`). |
+| `website/blog/` | The build log (`docs.sierrafy.dev/log`): the decisions, trade-offs and mistakes behind the code. |
 | `scripts/` | The `check:pii` guard and the allowlist of synthetic identifiers. |
 | Root `*.md` policies | [`PRIVACY.md`](PRIVACY.md), [`SECURITY.md`](SECURITY.md), [`RESPONSIBLE_USE.md`](RESPONSIBLE_USE.md), and [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md). Public commitments, not internal notes: change them deliberately. |
 
@@ -199,6 +200,43 @@ built.
   form; the launch page replaced it with the install command. If a launch list is
   wanted again, it needs the Netlify form attributes back
   (`data-netlify`, a hidden `form-name`, a `bot-field` honeypot).
+
+### The build log
+
+The build log is the Docusaurus blog in `website/blog`, published at
+[docs.sierrafy.dev/log](https://docs.sierrafy.dev/log). It records decisions,
+trade-offs and mistakes, with the numbers behind them. It is not a release
+feed: the `CHANGELOG.md` says what changed, and an entry says why.
+
+- **One entry, one decision.** The shape that works: what the spec or the docs
+  claimed, what was actually true, what else was considered, what was decided,
+  what it cost, and what is still open. Entries own their mistakes plainly,
+  including the ones found before any code shipped.
+- **Entries are numbered in the first line**, as
+  `**Build log #N · scope · status**`, and the number is the publication
+  sequence. Same-day entries carry a time in `date:` so the index order is
+  deterministic.
+- **Authors and tags are declared**, in `blog/authors.yml` and `blog/tags.yml`.
+  `onInlineAuthors` and `onInlineTags` are set to `throw`, so an author block or
+  an undeclared tag in an entry's front matter fails the build. Add the tag to
+  `tags.yml` first; keep the list short enough to be an index.
+- **Every entry needs a `<!-- truncate -->` marker.** `onUntruncatedBlogPosts`
+  is `throw`, because an entry with no marker dumps its whole body onto the
+  index page.
+- **Numbers carry their sample size.** "20% exact extraction on ten samples" is
+  publishable; "20% accuracy" is a claim the project cannot defend. Measured
+  figures belong with the method that produced them, and
+  `RESPONSIBLE_USE.md` commits to publishing known error rates, so the log is
+  held to the same standard.
+- **The PII rule applies with full force.** An entry about reading ID cards is
+  the most likely place for a real value to appear as a worked example, which
+  has happened once already in a spec. Use the synthetic literals in
+  `scripts/allowed-id-literals.txt`, and run `pnpm run check:pii`.
+- **Positioning does not relax because the voice is personal.** First-person
+  writing is where "NCRA has no API" slips out as a complaint instead of a
+  description of missing tooling. See "Messaging and positioning" below.
+- **Write entries for a milestone, not a calendar.** A log that goes quiet
+  after two entries reads worse than no log.
 
 ### Writing style
 

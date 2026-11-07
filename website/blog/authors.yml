@@ -1,0 +1,11 @@
+# Build log authors. Referenced by key from each entry's `authors:` front
+# matter; `onInlineAuthors: 'throw'` in docusaurus.config.ts keeps it that way,
+# so an author block pasted into an entry fails the build instead of drifting.
+
+umaru:
+  name: Umaru S. Biango
+  title: Sierrafy maintainer
+  url: https://umarubiango.dev
+  page: true
+  socials:
+    github: SUBiango

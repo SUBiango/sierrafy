@@ -35,7 +35,42 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/SUBiango/sierrafy/tree/main/website/',
         },
-        blog: false,
+        /**
+         * The build log at docs.sierrafy.dev/log. Entries record a decision,
+         * a trade-off or a mistake, with the numbers behind it.
+         *
+         * Docs own `routeBasePath: '/'`, so the blog takes `/log`. Every
+         * `on*` setting below is set to 'throw' for the same reason as
+         * `onBrokenLinks`: these are mistakes that are invisible in a built
+         * site and obvious in a failed build.
+         */
+        blog: {
+          path: './blog',
+          routeBasePath: 'log',
+          blogTitle: 'Build log',
+          blogDescription:
+            'The decisions behind Sierrafy, the trade-offs, the mistakes and the numbers.',
+          blogSidebarTitle: 'All entries',
+          blogSidebarCount: 'ALL',
+          postsPerPage: 10,
+          showReadingTime: true,
+          editUrl: 'https://github.com/SUBiango/sierrafy/tree/main/website/',
+          // Authors and tags are declared in blog/authors.yml and blog/tags.yml.
+          onInlineAuthors: 'throw',
+          onInlineTags: 'throw',
+          // An entry with no <!-- truncate --> marker dumps its whole body onto
+          // the index page, which is how a build log stops being skimmable.
+          onUntruncatedBlogPosts: 'throw',
+          feedOptions: {
+            type: ['rss', 'atom'],
+            title: 'Sierrafy build log',
+            description:
+              'The decisions behind Sierrafy, the trade-offs, the mistakes and the numbers.',
+            copyright:
+              'Sierrafy build log. An independent open-source project, not an NCRA product.',
+            xslt: true,
+          },
+        },
         theme: { customCss: './src/css/custom.css' },
       } satisfies Preset.Options,
     ],
@@ -52,6 +87,7 @@ const config: Config = {
           position: 'left',
           label: 'Docs',
         },
+        { to: '/log', label: 'Build log', position: 'left' },
         {
           href: 'https://sierrafy.dev/',
           label: 'sierrafy.dev',
@@ -78,6 +114,7 @@ const config: Config = {
         {
           title: 'Project',
           items: [
+            { label: 'Build log', to: '/log' },
             { label: 'GitHub', href: 'https://github.com/SUBiango/sierrafy' },
             {
               label: 'Changelog',
