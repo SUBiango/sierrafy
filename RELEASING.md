@@ -46,6 +46,9 @@ since the last tag as though someone else wrote it.
 **2. Bump the version.** On the release branch, set the same version in
 `package.json` and `packages/core/package.json`, and move the `Unreleased`
 section of [CHANGELOG.md](CHANGELOG.md) under the new number with today's date.
+Update the version badge in `site/index.html` too: it is the only copy of the
+number outside the package files, nothing checks it, and it sat at `v0.1.0` for
+thirteen days after 0.1.1 shipped.
 
 **3. Check what will actually ship**, rather than trusting `files`:
 
