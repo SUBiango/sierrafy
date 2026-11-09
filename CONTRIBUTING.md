@@ -189,6 +189,12 @@ built.
   REAL DOCUMENT" label. Never substitute a real card, photo or NIN. Any new
   identifier on the page also needs an entry in
   `scripts/allowed-id-literals.txt`, or the PII guard fails the build.
+- **The OCR layer reads one document type.** `SL_NATIONAL_EID` is the only zone
+  map that exists, and the docs say the engine reads "a Sierra Leone National
+  eID card". Passport and MRZ support is in the architecture spec (§4.2) and is
+  not built, so the page must not describe it as something OCR does today. The
+  page claimed OCR read "the eID card or passport (including the MRZ)" until
+  2026-11-09. Phase 1 scope in the spec is not the same thing as what ships.
 - **Every layer on the page carries a build status.** The page shows the whole
   Phase 1 API, including endpoints that do not exist yet, so each row has a
   `.pill-status` saying whether it is in the SDK, experimental, or in
