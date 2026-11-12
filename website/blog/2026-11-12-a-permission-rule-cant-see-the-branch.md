@@ -6,7 +6,7 @@ tags: [build-log, release, security]
 date: 2026-11-12
 ---
 
-**Build log #4 · Release process · Gate added, verified on six command shapes**
+**Build log #4 · Release process · Gate added, both branches protected**
 
 Merging a pull request into `develop` is bookkeeping. Merging one into `main` deploys two websites. Both are the same command, `gh pr merge <n>`, and a permission rule that allows one allows the other. Here is what that cost and what replaced it.
 
@@ -49,7 +49,11 @@ One detail I had not thought about: GitHub records all three as merged by me, be
 
 **Delete both rules.** Back to every merge and every push asking first, feature branches included. That is the state I had just paid to get out of, and most of those prompts guard nothing. Noise that is always ignored is not a gate.
 
-**Branch protection on GitHub.** Required reviews on `main` would stop this at the server, for every client, every machine and every contributor. It is the right answer. It does not solve today: I am the only maintainer, so a required review is one I approve myself, and the two branches turn out not to be protected at all. `RELEASING.md` has said they "should be" for weeks. Writing it down is not configuring it.
+**Branch protection on GitHub.** Protection stops things at the server, for every client and every machine, which is where a control belongs. Checking it while writing this entry is how I found out neither branch was protected at all. `RELEASING.md` had said both "should be" since the runbook was written. Writing it down is not configuring it.
+
+So I configured it. `main` and `develop` now require the `Node (lint + build + test)` and `Python (pytest)` checks, reject force-pushes and deletions, require a pull request to change them, and apply all of that to administrators, which means me. It is not an alternative to the hook, though. A green pull request into `main` still merges on one command, and that command is exactly the one that deploys. Protection enforces that work was tested and reviewable. It does not ask whether I meant to publish.
+
+Required approvals sit at zero, because I am the only maintainer and a required review would be one I give myself.
 
 **Prompt instead of block.** A hook that asks, so I can approve in the moment and keep publishing in one flow. This was my first attempt. It does not work, and the reason is the useful part of this entry.
 
@@ -83,11 +87,13 @@ I tested all six rows against the live permission system, not against a piped pa
 - **The publish step is manual again.** One command per release, typed by me. That is the whole point, but it is a real cost: the agent now stops at a green release PR and hands it back.
 - **There is no approving it in the moment.** A block is final for that call. "Ask" was the version I wanted and the version that did nothing.
 - **Fail-closed has a false-positive case.** A network problem blocks `develop` merges too, which are harmless.
-- **It protects one laptop.** The hook lives in my own agent configuration, outside the repository. A second machine has no gate, and neither would a contributor with push access. This is not branch protection and it should not be mistaken for it.
+- **It protects one laptop.** The hook lives in my own agent configuration, outside the repository, so it travels with the machine rather than the project.
 
 ## What is still open
 
-Protecting `main` and `develop` on GitHub, with the `Node (lint + build + test)` and `Python (pytest)` checks required and force-pushes off. That is the control that holds regardless of which client is driving. The hook is a stopgap on the machine that does the work, and it is worth having today, but the entry would be dishonest if it read as a fix.
+**A second pair of eyes.** Branch protection now enforces that the checks ran, which is not the same as someone having read the diff. With one maintainer there is no way to require that, and pretending otherwise with a self-approved review would be theatre.
+
+**The gate still protects one machine.** The hook lives in my own agent configuration. Another laptop, or anyone else with push access, gets branch protection and nothing else. Branch protection will not stop a merge into `main`, because a merge into `main` is the intended way to deploy. So the thing that distinguishes a deploy from bookkeeping is still a local file, and that is the weakest part of this setup.
 
 ## The takeaway
 
