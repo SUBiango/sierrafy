@@ -31,15 +31,46 @@ Needs the optional peers: `npm install sharp tesseract.js`. See
 
 ## Why the accuracy is low
 
-The cause is understood and is not a preprocessing problem. The NIN is 8
-alphanumeric characters with **no checksum**, so nothing disambiguates `0` from
-`O`, `1` from `I`, or `5` from `S`. Most misses are off by one or two such
-glyphs, and grayscale, green-channel and binarised preprocessing all produce the
-same substitutions.
+Two distinct things go wrong, in roughly equal measure. Of the 8 failures on the
+10-sample set:
 
-Three things would move it: an NCRA-confirmed checksum, which would let the
-engine auto-correct single-character errors; higher-resolution, flat,
-axis-aligned captures; or the optional Google Vision engine.
+- **4 drop characters**, coming back short by one or more with no wrong
+  characters at all. The recognizer is returning less than the field holds.
+- **3 substitute characters**, every one a known confusable pair. The NIN is 8
+  alphanumeric characters with **no checksum**, so nothing disambiguates `0`
+  from `O`, `1` from `I`, or `5` from `S`. Grayscale, green-channel and
+  binarised preprocessing all produce the same substitutions.
+- 1 does both.
+
+Neither is a framing or configuration problem, and that has been measured rather
+than assumed. Card-boundary detection, zone padding and every available page
+segmentation mode were each tried against the sample set and none beats 2/10,
+so the current offline configuration is at a local optimum.
+
+Three things would move it: higher-resolution, flat captures, which is the only
+lever against the dropped characters; an NCRA-confirmed checksum, which would
+let the engine correct the substitutions; or the optional Google Vision engine.
+The reasoning and the measurements are in the
+[M2 accuracy plan](https://github.com/SUBiango/sierrafy/blob/main/specs/002-ocr-engine-eid-zone-map/accuracy-plan.md).
+
+## Framing and tilt
+
+`ocr()` finds the card against its background, straightens it and crops to its
+edges before reading any zone, because the zone map's coordinates are fractions
+of the card: a margin down one side or a few degrees of tilt shifts every field.
+
+Detection is conservative. It declines on anything that does not look like a
+card on a background, including an image already cropped to the card edges, and
+returns the image untouched rather than guessing. Turn it off if your images are
+pre-cropped and you want to skip the work:
+
+```js
+const result = await ocr(imageBuffer, { normalizeCard: false });
+```
+
+It needs `sharp`, which OCR already requires. It makes no difference to the
+accuracy figure above, because all 10 calibration samples are already cropped to
+the card and are therefore declined.
 
 ## Checking against what the user typed
 

@@ -85,15 +85,33 @@
 
 ## Follow-ups to raise accuracy toward ≥80% (next milestones)
 
+Scoped and sequenced in [`accuracy-plan.md`](accuracy-plan.md), which also
+records what F2 settled and corrects the root-cause weighting in
+[`plan.md`](plan.md) §4.
+
 - [ ] **F1** Measure the **Google Vision** engine on the same set (needs a billed
-  `GOOGLE_VISION_KEY`); the architecture's accuracy-boost path.
-- [ ] **F2** Add **card-boundary normalisation** (detect + deskew + crop to the
-  card) so fixed zones survive rotated/margin-padded captures (samples 4, 7, 8).
+  `GOOGLE_VISION_KEY`); the architecture's accuracy-boost path. Note the
+  non-technical precondition: it transmits ten real cards to a third party.
+- [x] **F2** Added **card-boundary normalisation** (`normalizeCard`, on by
+  default): detects the card against its background, deskews and crops, so the
+  zone fractions land on the right text. **No accuracy change on this sample
+  set** (still 2/10, 58%), because all 10 samples are already cropped to the
+  card: aspect ratios run 1.531 to 1.637 against ID-1's 1.585. Retained for the
+  margin-padded and rotated captures the set does not contain, verified on drawn
+  fixtures. Needs the zone map re-measured on normalised cards before it can
+  contribute, which is a dependency of F3.
 - [ ] **F3** Source **higher-resolution, flat** captures; re-run the harness.
+  The largest failure bucket is dropped characters, and this is the only lever
+  that attacks it. Re-measure the zone map on normalised cards at the same time.
 - [ ] **F4** If NCRA confirms a **NIN checksum**, use it to auto-correct single
   glyph confusions (`0/O`, `1/I`, `5/S`).
+- [ ] **F5** (new) **Fine-tune on the card's font.** The substitutions come from
+  the generic English model's prior, not the ink, and the NIN sits in a fixed
+  font at a fixed position. The only in-our-control lever against the
+  substitution bucket; shares F3's need for more consented samples.
 
 ## Dependencies
 
 T001–T002 → T003–T005 → T006–T009 → T010 → T011–T015 → T016–T017. B1/B2 done with
-the real samples. F1–F4 are future accuracy work, tracked for later milestones.
+the real samples. F2 done 2026-11-12. F1, F3, F4 and F5 are future accuracy
+work; F3 gates F5 and unblocks F2's contribution, and F4 is gated on NCRA.

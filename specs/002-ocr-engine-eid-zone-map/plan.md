@@ -57,6 +57,15 @@ items that were sample-gated:
   via `packages/core/scripts/measure-ocr-accuracy.mjs` (offline Tesseract). This
   is **below the ≥80% target.**
 
+> **Superseded in part, 2026-11-12.** The three causes below are all real, but
+> the weighting in cause 1 is wrong. Classifying each miss rather than only
+> counting it shows 4 of the 8 failures drop characters with **no** substitution
+> error at all, against 3 that are substitution-only and 1 mixed. Confusion is
+> the second largest bucket, not the majority. Cause 2's remedy was also built
+> and measured: card-boundary normalisation changes nothing on this set, because
+> the samples are already cropped to the card. See
+> [`accuracy-plan.md`](accuracy-plan.md).
+
 **Why offline Tesseract falls short on this set (root cause, understood):**
 
 > The `NIN`→`OCR output` examples below are **synthetic stand-ins** that reproduce
@@ -77,9 +86,10 @@ items that were sample-gated:
    green-channel extraction mitigates but does not eliminate it.
 
 **Levers to reach ≥80% (future work, not this milestone):**
-- The optional **Google Vision engine** (`OCR_ENGINE=google-vision`) — markedly
-  stronger OCR; the architecture's designated accuracy-boost path. Wired and
-  unit-tested (mocked); not measured here (needs a billed API key).
+- The optional **Google Vision engine** (`OCR_ENGINE=google-vision`) — the
+  architecture's designated accuracy-boost path. Wired and unit-tested (mocked);
+  not measured here (needs a billed API key, and a decision about transmitting
+  real cards to a third party — see [`accuracy-plan.md`](accuracy-plan.md) F1).
 - **Higher-resolution, flat, axis-aligned captures** (the dependency asked for
   *high-resolution* scans; the current set is mixed quality).
 - An **NCRA-confirmed NIN checksum**, which would let us auto-correct single
