@@ -34,8 +34,16 @@ feature branch  ->  PR  ->  develop  ->  release PR  ->  main  ->  tag  ->  npm
 - Hotfixes branch from `main`, PR into `main`, then `main` is merged back into
   `develop` so the fix is not lost.
 
-Both branches should be protected, requiring the `Node (lint + build + test)` and
-`Python (pytest)` checks, with force-pushes disallowed.
+Both branches are protected, as of 2026-11-12. They require the
+`Node (lint + build + test)` and `Python (pytest)` checks, require a pull
+request, reject force-pushes and deletions, and include administrators, so the
+rules above are enforced rather than merely agreed. Required approvals are zero,
+because a single maintainer approving their own pull request proves nothing; the
+checks are the gate.
+
+Protection is not a publish gate. A green pull request into `main` merges on one
+command, and that command deploys both sites. See
+[the build log entry on the publish gate](https://docs.sierrafy.dev/log/a-permission-rule-cant-see-the-branch).
 
 ## Cutting a release
 
@@ -163,7 +171,8 @@ Two things from that guide are worth knowing before you tag: a CI token must hav
 **direct publishing with a granular token is removed in January 2027**, so the
 move to trusted publishing is a deadline rather than a preference.
 
-Also **protect `main` and `develop`** as described above.
+Branch protection on `main` and `develop` is already in place; see "Branches"
+above for the exact settings.
 
 ## If a release is wrong
 
