@@ -36,3 +36,8 @@ testing:
   label: Testing
   permalink: /testing
   description: Tests that caught something, and tests that only looked like they did.
+
+release:
+  label: Release
+  permalink: /release
+  description: The runbook, the publish path, and what gates it.
