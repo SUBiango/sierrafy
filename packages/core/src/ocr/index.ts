@@ -1,5 +1,6 @@
 import { resolveEngine } from './engines';
 import { normalizeDob } from './normalize-dob';
+import { normalizeCard } from './normalize-card';
 import { loadZoneMap } from './zone-map';
 import type {
   DocumentType,
@@ -17,6 +18,11 @@ export type { SubmittedFields } from './cross-check';
 export type { TesseractEngineOptions } from './types';
 export { normalizeDob } from './normalize-dob';
 export { loadZoneMap, toPixelBox } from './zone-map';
+export { normalizeCard, CARD_ASPECT_RATIO } from './normalize-card';
+export type {
+  NormalizeCardOptions,
+  NormalizeCardResult,
+} from './normalize-card';
 export { resolveEngine } from './engines';
 
 /** Document types the OCR engine can extract in this milestone (M2 = eID only). */
@@ -34,6 +40,15 @@ export interface OcrOptions {
    * takes a mirror URL or a directory holding `eng.traineddata.gz`.
    */
   tesseract?: TesseractEngineOptions;
+  /**
+   * Find, straighten and crop to the card before reading zones (default true).
+   * The zone map's coordinates are fractions of the card, so a margin or a few
+   * degrees of tilt shifts every field. Detection is conservative and falls
+   * back to the original image when the result does not look like a card, so
+   * turning this off is only useful for images already cropped to the card
+   * edges, or to reproduce pre-0.2.0 behaviour. See {@link normalizeCard}.
+   */
+  normalizeCard?: boolean;
 }
 
 /**
@@ -61,7 +76,13 @@ export async function ocr(
     };
   }
 
-  const image = Buffer.isBuffer(idImage) ? idImage : Buffer.from(idImage);
+  const source = Buffer.isBuffer(idImage) ? idImage : Buffer.from(idImage);
+  // Normalise before the engine runs, not inside it, so every engine reads the
+  // same geometry and the zone fractions mean the same thing for all of them.
+  const image =
+    options.normalizeCard === false
+      ? source
+      : (await normalizeCard(source)).image;
   const zoneMap = loadZoneMap(documentType);
   const engine = resolveEngine(options.engine, options.tesseract);
   const recognition = await engine.recognize(image, zoneMap);

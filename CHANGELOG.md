@@ -12,6 +12,34 @@ scaffold and is marked private.
 
 ## [Unreleased]
 
+### Added
+
+- **Card-boundary normalisation in `ocr()`**, on by default and disabled with
+  `ocr(image, { normalizeCard: false })`. It finds the card against its
+  background, corrects tilt and crops to the card's edges before any zone is
+  read, because the zone map's coordinates are fractions of the card and a
+  margin or a few degrees of tilt shifts every field. Detection is conservative:
+  it declines on anything that does not look like a card on a background,
+  including an image already cropped to the card, and returns the image
+  untouched rather than guessing. `normalizeCard` is also exported for direct
+  use.
+
+  **This does not change the published accuracy figure.** All 10 calibration
+  samples are already cropped to the card, so all 10 are declined and exact NIN
+  extraction stays at 2 of 10. It is there for the margin-padded and rotated
+  captures a mobile flow produces, which the sample set does not contain.
+
+### Fixed
+
+- **Corrected the stated cause of the OCR accuracy gap.** The docs said most
+  misses were off by one or two confusable glyphs. Classifying each miss instead
+  of counting it shows 4 of the 8 failures drop characters with no substitution
+  error at all, against 3 substitution-only and 1 mixed. The docs, the milestone
+  plan and the new
+  [M2 accuracy plan](https://github.com/SUBiango/sierrafy/blob/main/specs/002-ocr-engine-eid-zone-map/accuracy-plan.md)
+  now say so, along with the measurements showing that card detection, zone
+  padding and page segmentation each change nothing.
+
 ## [0.1.1] - 2026-10-27
 
 ### Added
